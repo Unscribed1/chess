@@ -39,6 +39,9 @@ class path_box():
 class selector():
     def __init__(self,x,y):
         self.selector = PhotoImage(file="selector.png")
+        self.waiter = PhotoImage(file="selector2.png")
+        self.current_player = "white"
+        self.waiting_player = "black"
         self.x = x
         self.y = y
         self.selectee = True
@@ -70,21 +73,24 @@ def mover(sele, x, y): # moves the selector
         sele.y = 25
 
 def fetcher(sele): # selects a peice
-    for x in range(0,len(pathlist)):
-            pathobj = pathlist[x]
-            pathobj.x = -150
-            pathobj.y = -150
-            canvas.moveto(pathobj.form, -100, -100)
+    ## why'd I put this here?
+##    for x in range(0,len(pathlist)):
+##            pathobj = pathlist[x]
+##            pathobj.x = -150
+##            pathobj.y = -150
+##            canvas.moveto(pathobj.form, -100, -100)
             
     for i in range(0,len(piecelist)):
         if sele.x == piecelist[i].x and sele.y == piecelist[i].y:
-            pathways(piecelist[i])
-            xf = piecelist[i].x
-            yf = piecelist[i].y
-            sele.selectee = piecelist[i]
-            print(xf, ",", yf,"Fetched")
-            print(sele.selectee)
-            canvas.moveto(flash_obj.form, xf-25, yf-25)
+            if sele.current_player == piecelist[i].team:
+                print("got here")
+                pathways(piecelist[i])
+                xf = piecelist[i].x
+                yf = piecelist[i].y
+                sele.selectee = piecelist[i]
+                print(xf, ",", yf,"Fetched")
+                print(sele.selectee)
+                canvas.moveto(flash_obj.form, xf-25, yf-25)
 
 def pitcher(selectee,pathlist): # Sends the piece to the desired location
     occupied_by_friendly = False
@@ -115,7 +121,10 @@ def pitcher(selectee,pathlist): # Sends the piece to the desired location
                 obj.firstmove = 2
                 canvas.moveto(obj.form, obj.x-25, obj.y-25)
                 canvas.moveto(flash_obj.form, -100, -100)
-                sele.selectee = True # Clears currently selected piece
+                canvas.delete(sele.form)
+                sele.current_player, sele.waiting_player = sele.waiting_player, sele.current_player
+                sele.selector, sele.waiter = sele.waiter, sele.selector
+                sele.form = canvas.create_image(sele.x,sele.y, image=sele.selector)
                 break
         for x in range(0,len(pathlist)):
             pathobj = pathlist[x]
