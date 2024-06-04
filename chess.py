@@ -1,8 +1,5 @@
 from tkinter import *
 
-piecelist = []
-pathlist = []
-
 board = Tk()
 board.geometry("400x400")
 
@@ -32,9 +29,10 @@ class piece():
 
 class path_box():
     def __init__(self,x,y):
+        self.pathimg = PhotoImage(file="pathway.png")
         self.x = x
         self.y = y
-        self.form = True
+        self.form = canvas.create_image(x,y,image=self.pathimg)
 
 class selector():
     def __init__(self,x,y):
@@ -72,14 +70,8 @@ def mover(sele, x, y): # moves the selector
         sele.x = 25
         sele.y = 25
 
-def fetcher(sele): # selects a peice
-    ## why'd I put this here?
-##    for x in range(0,len(pathlist)):
-##            pathobj = pathlist[x]
-##            pathobj.x = -150
-##            pathobj.y = -150
-##            canvas.moveto(pathobj.form, -100, -100)
-            
+def fetcher(sele): # selects a piece
+    pathway_cleaner()
     for i in range(0,len(piecelist)):
         if sele.x == piecelist[i].x and sele.y == piecelist[i].y:
             if sele.current_player == piecelist[i].team:
@@ -113,7 +105,7 @@ def pitcher(selectee,pathlist): # Sends the piece to the desired location
             print(pathlist[i].x)
             print(pathlist[i].y)
             print("newloop")
-            if sele.x == pathlist[i].x and sele.y == pathlist[i].y:
+            if sele.x == pathlist_used[i].x and sele.y == pathlist_used[i].y:
                 matchfound = 1
                 obj = selectee
                 obj.x = sele.x
@@ -126,39 +118,72 @@ def pitcher(selectee,pathlist): # Sends the piece to the desired location
                 sele.selector, sele.waiter = sele.waiter, sele.selector
                 sele.form = canvas.create_image(sele.x,sele.y, image=sele.selector)
                 break
-        for x in range(0,len(pathlist)):
-            pathobj = pathlist[x]
-            pathobj.x = -100
-            pathobj.y = -100
-            canvas.moveto(pathobj.form, -100, -100)
-        pathlist.clear()
-        pathlist=[]
+    pathway_cleaner()
 
     if occupied_by_enemy == True and matchfound == 1:
         enemy.x = -100
         enemy.y = -100
         canvas.moveto(enemy.form, -100,-100)
 
-pathimg = PhotoImage(file="pathway.png")
-path1 = path_box(-100,-100)
-path2 = path_box(-100,-100)
-path1.form = canvas.create_image(-100,-100,image=pathimg)
-path2.form = canvas.create_image(-100,-100,image=pathimg)
+pathlist_used = []
+pathlist = [path_box(-100,-100) for i in range(20)]
+
+##pathimg = PhotoImage(file="pathway.png")
+##path1 = path_box(-100,-100)
+##path2 = path_box(-100,-100)
+##path3 = path_box(-100,-100)
+##path4 = path_box(-100,-100)
+
+def pathway_cleaner():
+    print("\n",len(pathlist_used),pathlist_used,"\n")
+    for x in pathlist_used:
+        print(pathlist_used[0], "ELEMENT")
+        pathlist_used[0].x = -100
+        pathlist_used[0].y = -100
+        canvas.moveto(pathlist_used[0].form, -100, -100)
+        pathlist.append(pathlist_used[0])
+        pathlist_used.pop(0)
+
+def pathways_checker(obj):
+    x = obj.x
+    y = obj.y
+    upper_x = [x-50, x+50]
+    upper_right_y = y-50
+    upper_left_y = y-50
+    forward_x = x
+    forward_y = y-50
+    print("loop should start here")
+    for i in range(0,len(piecelist)):
+        if piecelist[i].x in upper_x and upper_right_y == piecelist[i].y:
+             if obj.team != piecelist[i].team:
+                 print("ENEMY FOUND")
+                 pathlist_used.append(pathlist[0])
+                 pathlist.pop(0)
+                 canvas.moveto(path3.form, piecelist[i].x-25, piecelist[i].y-25)
+                 path3.x = piecelist[i].x
+                 path3.y = piecelist[i].y
+    
 
 def pathways(obj):
     x = obj.x
     y = obj.y
     if obj.team == "white":
         if obj.ttype == "pawn":
-            canvas.moveto(path1.form, x-25,y-75)
-            path1.x = x
-            path1.y = y-50
+            pathlist_used.append(pathlist[0])
+            pathlist.pop(0)
+            canvas.moveto(pathlist_used[0].form, x-25,y-75)
+            pathlist_used[0].x = x
+            pathlist_used[0].y = y-50
+            print(pathlist_used, pathlist_used[0].x, pathlist_used[0].y,"pathlist used")
             if obj.firstmove == 1:
-                canvas.moveto(path2.form, x-25,y-125)
-                path2.x = x
-                path2.y = y-100
-            pathlist.append(path1)
-            pathlist.append(path2)
+                pathlist_used.append(pathlist[1])
+                pathlist.pop(1)
+                canvas.moveto(pathlist_used[1].form, x-25,y-125)
+                pathlist_used[1].x = x
+                pathlist_used[1].y = y-100
+##            pathlist.append(path1)
+##            pathlist.append(path2)
+##            pathways_checker(obj)
             print("traced")
     if obj.team == "black":
         if obj.ttype == "pawn":
@@ -172,6 +197,8 @@ def pathways(obj):
             pathlist.append(path1)
             pathlist.append(path2)
             print("traced")
+
+piecelist = []
 
 piece1 = piece(25,75,"black", "pawn")
 piece2 = piece(75,75,"black", "pawn")
