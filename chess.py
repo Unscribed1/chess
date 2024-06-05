@@ -27,6 +27,11 @@ class piece():
         self.ttype = ttype
         self.form = True
 
+class coordinates():
+    def __init__(self,x,y):
+        self.x = x
+        self.y = y
+        
 class path_box():
     def __init__(self,x,y):
         self.pathimg = PhotoImage(file="pathway.png")
@@ -53,14 +58,21 @@ class flashbox():
         self.form = canvas.create_image(x,y,image=self.flasher)
 
 def piece_initialiser(obj):
-    if obj.ttype == "pawn":
-        if obj.team == "black":
+    if obj.team == "black":
+        if obj.ttype == "pawn":
             obj.ogpiece = PhotoImage(file="black_pawn.png")
             obj.form = canvas.create_image(obj.x,obj.y, image=obj.ogpiece)
-        elif obj.team == "white":
+        if obj.ttype == "rook":
+            obj.ogpiece = PhotoImage(file="thex.png")
+            obj.form = canvas.create_image(obj.x,obj.y, image=obj.ogpiece)
+    if obj.team == "white":
+        if obj.ttype == "pawn":
             obj.ogpiece = PhotoImage(file="white_pawn.png")
             obj.form = canvas.create_image(obj.x,obj.y, image=obj.ogpiece)
-
+        if obj.ttype == "rook":
+            obj.ogpiece = PhotoImage(file="thex.png")
+            obj.form = canvas.create_image(obj.x,obj.y, image=obj.ogpiece)
+            
 def mover(sele, x, y): # moves the selector
     canvas.move(sele.form, x, y)
     sele.x += x
@@ -141,23 +153,57 @@ def pathway_cleaner(): # organizes the path lists
         x += 1
         print("USED PATH MOVED TO PATHLIST")
 
+##def direction_checker_front(obj):
+##    if obj.team == "black":
+##        z = 100
+##    else:
+##        z = 0
+####    forward_x = obj.x ## We're working with the y dimension here, x not needed
+##    forward_y = obj.y-50+z
+##    for i in range(0,len(piecelist)):
+##        if piecelist[i].x == obj.x and forward_y == piecelist[i].y:
+##            print("SPACE OCCUPIED")
+##            return 1
+##            break
+##    else:
+##        return 0
+
+def crossref(ylist, xpos):
+    pass
+
+def direction_checker_north(obj):
+    northlist = []
+    for i in range(obj.y-50,-25,-50):
+        a = coordinates(obj.x, i)
+        northlist.append(a)
+    return northlist
+
+def direction_checker_south(obj):
+    southlist = []
+    for i in range(obj.y+50,375,50):
+        pass
+    return southlist
+        
+
 def pathways_checker_pawn(obj):
     x = obj.x
     y = obj.y
     if obj.team == "white":
-        pathlist_used.append(pathlist[0])
-        pathlist.pop(0)
-        canvas.moveto(pathlist_used[0].form, x-25,y-75)
-        pathlist_used[0].x = x
-        pathlist_used[0].y = y-50
-        print("PATH APPENDED TO PATHLIST_USED")
-        if obj.firstmove == 1:
-            pathlist_used.append(pathlist[1])
-            pathlist.pop(1)
-            canvas.moveto(pathlist_used[1].form, x-25,y-125)
-            pathlist_used[1].x = x
-            pathlist_used[1].y = y-100
+        northlist = direction_checker_north(obj)
+        if northlist[0] == False:
+            pathlist_used.append(pathlist[0])
+            pathlist.pop(0)
+            canvas.moveto(pathlist_used[0].form, x-25,y-75)
+            pathlist_used[0].x = x
+            pathlist_used[0].y = y-50
             print("PATH APPENDED TO PATHLIST_USED")
+            if obj.firstmove == 1 and northlist[1] == False:
+                pathlist_used.append(pathlist[1])
+                pathlist.pop(1)
+                canvas.moveto(pathlist_used[1].form, x-25,y-125)
+                pathlist_used[1].x = x
+                pathlist_used[1].y = y-100
+                print("PATH APPENDED TO PATHLIST_USED")
     if obj.team == "black":
         pathlist_used.append(pathlist[0])
         pathlist.pop(0)
@@ -174,16 +220,11 @@ def pathways_checker_pawn(obj):
         z = 100
     else:
         z = 0
-    x = obj.x
-    y = obj.y
     upper_x = [x-50, x+50]
-    upper_right_y = y-50+z
-    upper_left_y = y-50+z
-    forward_x = x
-    forward_y = y-50+z
+    upper_y = y-50+z
     print("loop should start here")
-    for i in range(0,len(piecelist)):
-        if piecelist[i].x in upper_x and upper_right_y == piecelist[i].y:
+    for i in range(0,len(piecelist)): # DIAGONALS
+        if (piecelist[i].x in upper_x) and upper_y == piecelist[i].y:
              if obj.team != piecelist[i].team:
                  print("ENEMY FOUND")
                  newpath = pathlist[0]
@@ -220,6 +261,8 @@ piece14 = piece(275,325,"white", "pawn")
 piece15 = piece(325,325,"white", "pawn")
 piece16 = piece(375,325,"white", "pawn")
 
+piece17 = piece(25,375,"white","rook")
+
 sele = selector(25,25)
 flash_obj = flashbox(-100,-100)
 
@@ -240,6 +283,7 @@ piecelist.append(piece13)
 piecelist.append(piece14)
 piecelist.append(piece15)
 piecelist.append(piece16)
+piecelist.append(piece17)
 
 board.bind("<Right>", lambda x: mover(sele, x=50, y=0))
 board.bind("<Left>", lambda x: mover(sele, x=-50, y=0))
@@ -251,8 +295,5 @@ board.bind("d", lambda x: pitcher(sele.selectee,pathlist))
 #Places the graphical representation of the pieces on the board
 for i in range(0,len(piecelist)):
     piece_initialiser(piecelist[i])
-
-if isinstance(piece1, selector):
-    print("It's alive")
     
 board.mainloop()
