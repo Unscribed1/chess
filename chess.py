@@ -15,7 +15,6 @@ for x in range(0,500,100): # Loop to create the chess board.
         canvas.create_rectangle((z,y,z+50,y+50), fill="navy", width = 0)
         canvas.create_rectangle((z-50,y,z,y+50), fill="grey", width = 0)
 
-# Good find: If you display an image inside a function, then make sure to keep the reference to the image object in your Python program, either by storing it in a global variable or by attaching it to another object.
 class piece():
     def __init__(self, x, y, team, ttype):
         self.pathlist= []
@@ -96,6 +95,9 @@ def fetcher(sele): # selects a piece
                 print(sele.selectee)
                 canvas.moveto(flash_obj.form, xf-25, yf-25)
 
+# There's an error when I press D outside of the paths. I've lingered too much on how to fix it,
+# and since it doesn't seem to affect functionality, I'll leave it for later.
+
 def pitcher(selectee,pathlist): # Sends the piece to the desired location
     occupied_by_friendly = False
     occupied_by_enemy = False
@@ -111,12 +113,7 @@ def pitcher(selectee,pathlist): # Sends the piece to the desired location
                 enemy = piecelist[i]
     
     if occupied_by_friendly == False :
-        for i in range(0,len(pathlist)):
-            print(sele.x)
-            print(sele.y)
-            print(pathlist[i].x)
-            print(pathlist[i].y)
-            print("newloop")
+        for i in range(0,len(pathlist_used)):
             if sele.x == pathlist_used[i].x and sele.y == pathlist_used[i].y:
                 matchfound = 1
                 obj = selectee
@@ -151,71 +148,116 @@ def pathway_cleaner(): # organizes the path lists
         pathlist.append(pathlist_used[0])
         pathlist_used.pop(0)
         x += 1
-        print("USED PATH MOVED TO PATHLIST")
 
-##def direction_checker_front(obj):
-##    if obj.team == "black":
-##        z = 100
-##    else:
-##        z = 0
-####    forward_x = obj.x ## We're working with the y dimension here, x not needed
-##    forward_y = obj.y-50+z
-##    for i in range(0,len(piecelist)):
-##        if piecelist[i].x == obj.x and forward_y == piecelist[i].y:
-##            print("SPACE OCCUPIED")
-##            return 1
-##            break
-##    else:
-##        return 0
-
-def crossref(ylist, xpos):
-    pass
-
-def direction_checker_north(obj):
-    northlist = []
-    for i in range(obj.y-50,-25,-50):
-        a = coordinates(obj.x, i)
-        northlist.append(a)
-    return northlist
-
-def direction_checker_south(obj):
-    southlist = []
-    for i in range(obj.y+50,375,50):
-        pass
-    return southlist
-        
-
-def pathways_checker_pawn(obj):
-    x = obj.x
-    y = obj.y
+def crossref(checkerlist, pos, obj): # checks if the output of the direction checker and piecelist overlap
+    matchlist = []
+    z = False
     if obj.team == "white":
-        northlist = direction_checker_north(obj)
-        if northlist[0] == False:
+        z = True
+    if obj.ttype == "rook":
+        for i in range(0, len(piecelist)):
+            if piecelist[i].y in (checkerlist[d].y for d in range(0, len(checkerlist))) and piecelist[i].x == obj.x and piecelist[i].y < obj.y:
+                print("FOUND SOMETHINGGG")
+                print(piecelist[i].x, piecelist[i].y)
+                matchlist.append(piecelist[i])
+    if obj.ttype == "pawn":
+        for i in range(0, len(piecelist)):
+            if piecelist[i].y in (checkerlist[d].y for d in range(0, len(checkerlist))) and piecelist[i].x == obj.x:
+                print("FOUND SOMETHINGGG")
+                print(piecelist[i].x, piecelist[i].y)
+                matchlist.append(piecelist[i])
+    matchlist.sort(key=lambda f: f.y, reverse=z)
+    if len(matchlist) == 0: # bad fix
+        c = coordinates(obj.x,-100)
+        matchlist = [c]
+    return matchlist
+
+def direction_checker_leftright(obj): # check north and south
+    leftrightlist = []
+    if obj.ttype == "rook":
+        for i in range(25,425,50):
+            if obj.x != i:
+                print("appendanleftright")
+                a = coordinates(i, obj.y)
+                leftrightlist.append(a)
+    return leftrightlist
+
+def direction_checker_updown(obj): # check north and south
+    updownlist = []
+    if obj.ttype == "pawn":
+        b = -50
+        d = -25
+        c = -50
+        if obj.team == "black":
+            b = 50
+            d = 375
+            c = 50
+        for i in range(obj.y+b, d,c):
+            a = coordinates(obj.x, i)
+            updownlist.append(a)
+    if obj.ttype == "rook":
+        for i in range(25,425,50):
+            if obj.y != i:
+                print("appendan")
+                a = coordinates(obj.x, i)
+                updownlist.append(a)
+    return updownlist
+
+def pathways_checker_rook(obj):
+    updownlist = direction_checker_updown(obj)
+    somethingthere = crossref(updownlist, obj.x, obj)
+    leftrightlist = direction_checker_leftright(obj)
+    somethingthere2 = crossref(leftrightlist, obj.y, obj) 
+    print("aaaaa,",somethingthere[0].y, obj.y)
+    if somethingthere[0].y == -100:
+        somethingthere[0].y = 25
+    for i in range(somethingthere[0].y,obj.y,50):
+        print("we are here", i)
+        if obj.y > somethingthere[0].y:
+            canvas.moveto(pathlist[0].form, obj.x-25, i-25)
+            pathlist[0].x = obj.x
+            pathlist[0].y = i
             pathlist_used.append(pathlist[0])
             pathlist.pop(0)
-            canvas.moveto(pathlist_used[0].form, x-25,y-75)
-            pathlist_used[0].x = x
-            pathlist_used[0].y = y-50
-            print("PATH APPENDED TO PATHLIST_USED")
-            if obj.firstmove == 1 and northlist[1] == False:
-                pathlist_used.append(pathlist[1])
-                pathlist.pop(1)
-                canvas.moveto(pathlist_used[1].form, x-25,y-125)
-                pathlist_used[1].x = x
-                pathlist_used[1].y = y-100
-                print("PATH APPENDED TO PATHLIST_USED")
+    for i in range(375, obj.y,-50):
+        print("we are heredddd", i)
+        if obj.y > somethingthere[0].y:
+            canvas.moveto(pathlist[0].form, obj.x-25, i-25)
+            pathlist[0].x = obj.x
+            pathlist[0].y = i
+            pathlist_used.append(pathlist[0])
+            pathlist.pop(0)
+    for i in range(somethingthere2[0].y,obj.y,50):
+        pass
+    for i in range(0, len(pathlist_used)):
+        print("X:", pathlist_used[i].x," ", "Y:", pathlist_used[i].y)
+
+def pathways_checker_pawn(obj): # Creates pathways on board for pawns
+    x = obj.x
+    y = obj.y
+    e = -50
+    k = -75
+    h = -100
+    r = -125
     if obj.team == "black":
+        e = 50
+        k = 25
+        h = 100
+        r = 75        
+    updownlist = direction_checker_updown(obj)
+    somethingthere = crossref(updownlist, x, obj)
+    if somethingthere[0].x == obj.x and somethingthere[0].y != obj.y+e:
         pathlist_used.append(pathlist[0])
         pathlist.pop(0)
-        canvas.moveto(pathlist_used[0].form, x-25,y+25)
+        canvas.moveto(pathlist_used[0].form, x-25,y+k)
         pathlist_used[0].x = x
-        pathlist_used[0].y = y+50
-        if obj.firstmove == 1:
+        pathlist_used[0].y = y+e
+        if obj.firstmove == 1 and somethingthere[0].x == obj.x and somethingthere[0].y != obj.y+h:
             pathlist_used.append(pathlist[1])
             pathlist.pop(1)
-            canvas.moveto(pathlist_used[1].form, x-25,y+75)
+            canvas.moveto(pathlist_used[1].form, x-25,y+r)
             pathlist_used[1].x = x
-            pathlist_used[1].y = y+100
+            pathlist_used[1].y = y+h
     if obj.team == "black":
         z = 100
     else:
@@ -236,10 +278,10 @@ def pathways_checker_pawn(obj):
     
 
 def pathways(obj):
-    x = obj.x
-    y = obj.y
     if obj.ttype == "pawn":
         pathways_checker_pawn(obj)
+    if obj.ttype == "rook":
+        pathways_checker_rook(obj)
 
 piecelist = []
 
@@ -252,7 +294,7 @@ piece6 = piece(275,75,"black", "pawn")
 piece7 = piece(325,75,"black", "pawn")
 piece8 = piece(375,75,"black", "pawn")
 
-piece9 = piece(25,325,"white", "pawn")
+##piece9 = piece(25,325,"white", "pawn")
 piece10 = piece(75,325,"white", "pawn")
 piece11 = piece(125,325,"white", "pawn")
 piece12 = piece(175,325,"white", "pawn")
@@ -261,7 +303,16 @@ piece14 = piece(275,325,"white", "pawn")
 piece15 = piece(325,325,"white", "pawn")
 piece16 = piece(375,325,"white", "pawn")
 
-piece17 = piece(25,375,"white","rook")
+piece17 = piece(25,275,"white","rook")
+piece55 = piece(25,375,"black","pawn")
+piecelist.append(piece55)
+
+piece94 = piece(125,125,"black","pawn")
+piece92 = piece(125,225,"black","pawn")
+piece97 = piece(125,175,"black","pawn")
+piecelist.append(piece94)
+piecelist.append(piece92)
+piecelist.append(piece97)
 
 sele = selector(25,25)
 flash_obj = flashbox(-100,-100)
@@ -275,7 +326,7 @@ piecelist.append(piece6)
 piecelist.append(piece7)
 piecelist.append(piece8)
 
-piecelist.append(piece9)
+##piecelist.append(piece9)
 piecelist.append(piece10)
 piecelist.append(piece11)
 piecelist.append(piece12)
