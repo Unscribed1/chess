@@ -64,11 +64,20 @@ def piece_initialiser(obj):
         if obj.ttype == "rook":
             obj.ogpiece = PhotoImage(file="thex.png")
             obj.form = canvas.create_image(obj.x,obj.y, image=obj.ogpiece)
+        if obj.ttype == "bishop":
+            obj.ogpiece = PhotoImage(file="thex.png")
+            obj.form = canvas.create_image(obj.x,obj.y, image=obj.ogpiece)
     if obj.team == "white":
         if obj.ttype == "pawn":
             obj.ogpiece = PhotoImage(file="white_pawn.png")
             obj.form = canvas.create_image(obj.x,obj.y, image=obj.ogpiece)
         if obj.ttype == "rook":
+            obj.ogpiece = PhotoImage(file="thex.png")
+            obj.form = canvas.create_image(obj.x,obj.y, image=obj.ogpiece)
+        if obj.ttype == "bishop":
+            obj.ogpiece = PhotoImage(file="thex.png")
+            obj.form = canvas.create_image(obj.x,obj.y, image=obj.ogpiece)
+        if obj.ttype == "queen":
             obj.ogpiece = PhotoImage(file="thex.png")
             obj.form = canvas.create_image(obj.x,obj.y, image=obj.ogpiece)
             
@@ -135,7 +144,7 @@ def pitcher(selectee,pathlist): # Sends the piece to the desired location
         canvas.moveto(enemy.form, -100,-100)
 
 pathlist_used = []
-pathlist = [path_box(-100,-100) for i in range(20)]
+pathlist = [path_box(-100,-100) for i in range(50)]
 
 def pathway_cleaner(): # organizes the path lists
     x = 0
@@ -155,19 +164,28 @@ def crossref(checkerlist, obj, way): # checks if the output of the direction che
     z = False
     if obj.team == "white":
         z = True
-    if obj.ttype == "rook":
+    if obj.ttype == "rook" or "queen":
         if way == "updown":
             for i in range(0, len(piecelist)):
                 if piecelist[i].y in (checkerlist[d].y for d in range(0, len(checkerlist))) and piecelist[i].x == obj.x:
-                    print("FOUND SOMETHINGGG")
+                    print("FOUND SOMETHINGGG UPDOWN")
                     print(piecelist[i].x, piecelist[i].y)
                     matchlist.append(piecelist[i])
         if way == "leftright":
             for i in range(0, len(piecelist)):
                 if piecelist[i].x in (checkerlist[d].x for d in range(0, len(checkerlist))) and piecelist[i].y == obj.y:
-                    print("FOUND SOMETHINGGG")
+                    print("FOUND SOMETHINGGG LEFTRIGHT")
                     print(piecelist[i].x, piecelist[i].y)
-                    matchlist.append(piecelist[i])            
+                    matchlist.append(piecelist[i])
+    if obj.ttype == "bishop" or "queen":
+        if way == "diagonal":
+            print("wehere")
+            for i in range(0, len(piecelist)):
+                for d in range(0,len(checkerlist)):
+                    if (piecelist[i].x, piecelist[i].y) == (checkerlist[d].x, checkerlist[d].y):
+                        print("FOUND SOMETHING DIAGONALLY")
+                        print(piecelist[i].x, piecelist[i].y)
+                        matchlist.append(piecelist[i])
     if obj.ttype == "pawn":
         for i in range(0, len(piecelist)):
             if piecelist[i].y in (checkerlist[d].y for d in range(0, len(checkerlist))) and piecelist[i].x == obj.x:
@@ -192,37 +210,85 @@ def direction_checker_leftright(obj): # check left and right
 def direction_checker_west(obj):
     thelist = []
     for i in range(obj.x-50,-75,-50):
-        if obj.y != i:
-            print("appendan west")
-            a = coordinates(i, obj.y)
-            thelist.append(a)
+        print("appendan west")
+        print(i, obj.y)
+        a = coordinates(i, obj.y)
+        thelist.append(a)
     return thelist
             
 def direction_checker_east(obj):
     thelist = []
     for i in range(obj.x+50,425,50):
-        if obj.y != i:
-            print("appendan east")
-            a = coordinates(i, obj.y)
-            thelist.append(a)
+        print("appendan east")
+        print(i, obj.y)
+        a = coordinates(i, obj.y)
+        thelist.append(a)
     return thelist
             
 def direction_checker_north(obj):
     thelist = []
-    for i in range(obj.y,-25,-50):
-        if obj.y != i:
-            print("appendan north")
-            a = coordinates(obj.x, i)
-            thelist.append(a)
+    for i in range(obj.y-50,-25,-50):
+        print("appendan northh")
+        print(obj.x, i)
+        a = coordinates(obj.x, i)
+        thelist.append(a)
     return thelist
 
 def direction_checker_south(obj):
     thelist = []
     for i in range(425,obj.y,-50):
-        if obj.y != i:
-            print("appendan south")
-            a = coordinates(obj.x, i)
-            thelist.append(a)
+        print("appendan south")
+        a = coordinates(obj.x, i)
+        thelist.append(a)
+    return thelist
+
+def direction_checker_northeast(obj):
+    thelist = []
+    print(obj.x-25, "THE OBJ.X")
+    z = 0
+    v = 0
+    for i in range(obj.x+25, 375, 50):
+        z = z + 50
+        v = v - 50
+        print("APPENDING NORTHEAST")
+        a = coordinates(obj.x+z, obj.y+v)
+        print(obj.x+z, obj.y+v)
+        thelist.append(a)
+    return thelist
+
+def direction_checker_northwest(obj):
+    thelist = []
+    z = 0
+    for i in range(obj.x-25, 25, -50):
+        z = z + 50
+        a = coordinates(obj.x-z, obj.y-z)
+        print(obj.x-z, obj.y-z)
+        thelist.append(a)
+    return thelist
+
+def direction_checker_southwest(obj):
+    thelist = []
+    z = 0
+    v = 0
+    for i in range(obj.x-25, 25, -50):
+        z = z + 50
+        v = v - 50
+        print("APPENDING SOUTHWEST")
+        a = coordinates(obj.x-z, obj.y-v)
+        print(obj.x-z, obj.y-v)
+        thelist.append(a)
+    return thelist
+
+def direction_checker_southeast(obj):
+    thelist = []
+    print(obj.x-25, "THE OBJ.X")
+    z = 0
+    for i in range(obj.x+25, 375, 50):
+        z = z + 50
+        print("APPENDING SOUTHEAST")
+        a = coordinates(obj.x+z, obj.y+z)
+        print(obj.x+z, obj.y+z)
+        thelist.append(a)
     return thelist
 
 def direction_checker_updown(obj): # check north and south for pawns
@@ -239,6 +305,113 @@ def direction_checker_updown(obj): # check north and south for pawns
             a = coordinates(obj.x, i)
             updownlist.append(a)
     return updownlist
+
+def pathways_checker_bishop2(somethingthere,somethingthere2, somethingthere3, somethingthere4, obj):
+    z = 0
+    for i in range(obj.x, somethingthere[0].x, -50):
+        z = z + 50
+        canvas.moveto(pathlist[0].form, obj.x-z-25, obj.y-z-25)
+        pathlist[0].x = obj.x-z
+        pathlist[0].y = obj.y-z
+        pathlist_used.append(pathlist[0])
+        pathlist.pop(0)
+    z = 0
+    for i in range(obj.x, somethingthere2[0].x, 50):
+        print("Z BEFORE", z)
+        z = z + 50
+        print("THIS IS Z", z)
+        canvas.moveto(pathlist[0].form, obj.x+z-25, obj.y+z-25)
+        pathlist[0].x = obj.x+z
+        pathlist[0].y = obj.y+z
+        pathlist_used.append(pathlist[0])
+        pathlist.pop(0)
+    z = 0
+    c = 0
+    for i in range(obj.x, somethingthere3[0].x, 50):
+        z = z + 50
+        c = c - 50
+        canvas.moveto(pathlist[0].form, obj.x+z-25, obj.y+c-25)
+        pathlist[0].x = obj.x+z
+        pathlist[0].y = obj.y+c
+        pathlist_used.append(pathlist[0])
+        pathlist.pop(0)
+    z = 0
+    c = 0
+    for i in range(obj.x, somethingthere4[0].x, -50):
+        z = z - 50
+        c = c + 50
+        canvas.moveto(pathlist[0].form, obj.x+z-25, obj.y+c-25)
+        pathlist[0].x = obj.x+z
+        pathlist[0].y = obj.y+c
+        pathlist_used.append(pathlist[0])
+        pathlist.pop(0)
+
+def pathways_checker_bishop(obj):
+    z = 0
+    print("pathways checker bishop initialised")
+    northwestlist = direction_checker_northwest(obj)
+    southeastlist = direction_checker_southeast(obj)
+    northeastlist = direction_checker_northeast(obj)
+    southwestlist = direction_checker_southwest(obj)
+    print("THIS IS THE NORTHEAST LIST", northeastlist)
+    somethingthere = crossref(northwestlist, obj, "diagonal")
+    somethingthere2 = crossref(southeastlist, obj, "diagonal")
+    somethingthere3 = crossref(northeastlist, obj, "diagonal")
+    somethingthere4 = crossref(southwestlist, obj, "diagonal")
+    if somethingthere[0].y == -100:
+        somethingthere[0].x = -25
+    if somethingthere2[0].y == -100:
+        somethingthere2[0].x = 425
+    if somethingthere3[0].y == -100:
+        somethingthere3[0].x = 425
+    if somethingthere4[0].y == -100:
+        somethingthere4[0].y = 425
+    somethingthere.sort(key=lambda f: f.y, reverse=True)
+    somethingthere2.sort(key=lambda f: f.y)
+    somethingthere3.sort(key=lambda f: f.x)
+    somethingthere4.sort(key=lambda f: f.x, reverse=True)
+##    for d in range(len(somethingthere4)):
+##        print("THE LIST OF SOMETHINGTHERE4")
+##        print(somethingthere4[d].x, somethingthere4[d].y)
+##    print("the range", obj.x, somethingthere[0].x)
+##    for i in range(obj.x, somethingthere[0].x, -50):
+##        z = z + 50
+##        canvas.moveto(pathlist[0].form, obj.x-z-25, obj.y-z-25)
+##        pathlist[0].x = obj.x-z
+##        pathlist[0].y = obj.y-z
+##        pathlist_used.append(pathlist[0])
+##        pathlist.pop(0)
+##    z = 0
+##    for i in range(obj.x, somethingthere2[0].x, 50):
+##        print("Z BEFORE", z)
+##        z = z + 50
+##        print("THIS IS Z", z)
+##        canvas.moveto(pathlist[0].form, obj.x+z-25, obj.y+z-25)
+##        pathlist[0].x = obj.x+z
+##        pathlist[0].y = obj.y+z
+##        pathlist_used.append(pathlist[0])
+##        pathlist.pop(0)
+##    z = 0
+##    c = 0
+##    for i in range(obj.x, somethingthere3[0].x, 50):
+##        z = z + 50
+##        c = c - 50
+##        canvas.moveto(pathlist[0].form, obj.x+z-25, obj.y+c-25)
+##        pathlist[0].x = obj.x+z
+##        pathlist[0].y = obj.y+c
+##        pathlist_used.append(pathlist[0])
+##        pathlist.pop(0)
+##    z = 0
+##    c = 0
+##    for i in range(obj.x, somethingthere4[0].x, -50):
+##        z = z - 50
+##        c = c + 50
+##        canvas.moveto(pathlist[0].form, obj.x+z-25, obj.y+c-25)
+##        pathlist[0].x = obj.x+z
+##        pathlist[0].y = obj.y+c
+##        pathlist_used.append(pathlist[0])
+##        pathlist.pop(0)
+    pathways_checker_bishop2(somethingthere, somethingthere2, somethingthere3, somethingthere4, obj)
 
 def pathways_checker_rook(obj):
     northlist = direction_checker_north(obj)
@@ -308,7 +481,6 @@ def pathways_checker_pawn(obj): # Creates pathways on board for pawns
         somethingthere.sort(key=lambda f: f.y)
     else:
         somethingthere.sort(key=lambda f: f.y, reverse=True)
-    print("DADADADA", somethingthere[0].y)
     if (obj.y+e) != somethingthere[0].y:
         pathlist_used.append(pathlist[0])
         pathlist.pop(0)
@@ -321,18 +493,6 @@ def pathways_checker_pawn(obj): # Creates pathways on board for pawns
             canvas.moveto(pathlist_used[1].form, x-25,y+r)
             pathlist_used[1].x = x
             pathlist_used[1].y = y+h
-##    if somethingthere[0].x == obj.x and somethingthere[0].y != obj.y+e:
-##        pathlist_used.append(pathlist[0])
-##        pathlist.pop(0)
-##        canvas.moveto(pathlist_used[0].form, x-25,y+k)
-##        pathlist_used[0].x = x
-##        pathlist_used[0].y = y+e
-##        if obj.firstmove == 1 and somethingthere[0].x == obj.x and somethingthere[0].y != obj.y+h:
-##            pathlist_used.append(pathlist[1])
-##            pathlist.pop(1)
-##            canvas.moveto(pathlist_used[1].form, x-25,y+r)
-##            pathlist_used[1].x = x
-##            pathlist_used[1].y = y+h
     if obj.team == "black":
         z = 100
     else:
@@ -357,6 +517,11 @@ def pathways(obj):
         pathways_checker_pawn(obj)
     if obj.ttype == "rook":
         pathways_checker_rook(obj)
+    if obj.ttype == "bishop":
+        pathways_checker_bishop(obj)
+    if obj.ttype == "queen":
+        pathways_checker_bishop(obj)
+        pathways_checker_rook(obj)
 
 piecelist = []
 
@@ -376,12 +541,26 @@ piece13 = piece(225,325,"white", "pawn")
 piece14 = piece(275,325,"white", "pawn")
 piece15 = piece(325,325,"white", "pawn")
 piece16 = piece(375,325,"white", "pawn")
+piece23 = piece(25,325,"white", "pawn")
 
-piece17 = piece(25,275,"white","rook")
-piece55 = piece(25,375,"black","pawn")
-piecelist.append(piece55)
+piece17 = piece(25,375,"white","rook")
+piece18 = piece(375,375,"white", "rook")
+
+piece19 = piece(25,25,"black", "rook")
+piece20 = piece(375,25,"black", "rook")
+piece24 = piece(125, 25,"black", "bishop")
+piece25 = piece(275, 25,"black", "bishop")
 
 
+piece21 = piece(125,375,"white", "bishop")
+piece22 = piece(275,375,"white", "bishop")
+piece26 = piece(225,225,"white", "queen")
+piecelist.append(piece21)
+piecelist.append(piece22)
+piecelist.append(piece24)
+piecelist.append(piece25)
+piecelist.append(piece23)
+piecelist.append(piece26)
 sele = selector(25,25)
 flash_obj = flashbox(-100,-100)
 
@@ -402,6 +581,9 @@ piecelist.append(piece14)
 piecelist.append(piece15)
 piecelist.append(piece16)
 piecelist.append(piece17)
+piecelist.append(piece18)
+piecelist.append(piece19)
+piecelist.append(piece20)
 
 board.bind("<Right>", lambda x: mover(sele, x=50, y=0))
 board.bind("<Left>", lambda x: mover(sele, x=-50, y=0))
