@@ -71,6 +71,12 @@ def piece_initialiser(obj):
         if obj.ttype == "queen":
             obj.ogpiece = PhotoImage(file="black_queen.png")
             obj.form = canvas.create_image(obj.x,obj.y, image=obj.ogpiece)
+        if obj.ttype == "knight":
+            obj.ogpiece = PhotoImage(file="black_knight.png")
+            obj.form = canvas.create_image(obj.x,obj.y, image=obj.ogpiece)
+        if obj.ttype == "king":
+            obj.ogpiece = PhotoImage(file="black_king.png")
+            obj.form = canvas.create_image(obj.x,obj.y, image=obj.ogpiece)
     if obj.team == "white":
         if obj.ttype == "pawn":
             obj.ogpiece = PhotoImage(file="white_pawn.png")
@@ -85,7 +91,10 @@ def piece_initialiser(obj):
             obj.ogpiece = PhotoImage(file="white_queen.png")
             obj.form = canvas.create_image(obj.x,obj.y, image=obj.ogpiece)
         if obj.ttype == "knight":
-            obj.ogpiece = PhotoImage(file="thex.png")
+            obj.ogpiece = PhotoImage(file="white_knight.png")
+            obj.form = canvas.create_image(obj.x,obj.y, image=obj.ogpiece)
+        if obj.ttype == "king":
+            obj.ogpiece = PhotoImage(file="white_king.png")
             obj.form = canvas.create_image(obj.x,obj.y, image=obj.ogpiece)
             
 def mover(sele, x, y): # moves the selector
@@ -609,6 +618,8 @@ piece22 = piece(275,375,"white", "bishop")
 piece26 = piece(175,375,"white", "queen")
 piece27 = piece(175,25,"black", "queen")
 piece28 = piece(225,225,"white", "knight")
+piece29 = piece(225,375,"white","king")
+piece30 = piece(225,25,"black","king")
 piecelist.append(piece21)
 piecelist.append(piece22)
 piecelist.append(piece24)
@@ -617,6 +628,8 @@ piecelist.append(piece23)
 piecelist.append(piece26)
 piecelist.append(piece27)
 piecelist.append(piece28)
+piecelist.append(piece29)
+piecelist.append(piece30)
 sele = selector(25,25)
 flash_obj = flashbox(-100,-100)
 
