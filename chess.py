@@ -1,4 +1,7 @@
 from tkinter import *
+import time
+import os
+import threading
 
 board = Tk()
 board.geometry("400x400")
@@ -60,13 +63,7 @@ class flashbox():
         self.form = canvas.create_image(x,y,image=self.flasher)
         
         ############ RECURSIONS
-# def tri_recursion(k):
-  # if(k>0):
-    # result = k+tri_recursion(k-1)
-    # print(result)
-  # else:
-    # result = 0
-  # return result
+
 def north_recursion(obj, objx, objy, arg, xlist):
     print("north recursion")
     print("y start", objy)
@@ -317,8 +314,7 @@ def mover(sele, x, y): # moves the selector
         sele.x = 25
         sele.y = 25
 
-def fetcher(sele,status): # selects a piece
-    print(status)
+def fetcher(sele): # selects a piece
     pathway_cleaner()
     for i in range(0,len(piecelist)):
         if sele.x == piecelist[i].x and sele.y == piecelist[i].y:
@@ -329,17 +325,38 @@ def fetcher(sele,status): # selects a piece
                 sele.selectee = piecelist[i]
                 canvas.moveto(flash_obj.form, xf-25, yf-25)
 
-def pitcher(selectee,pathlist,piece29,piece30,status): # Sends the piece to the desired location
+def impossiblecheck():
+    c = len(sele.selectee.pathlist)
+    b = 0
+    for i in range(len(sele.selectee.pathlist)):
+        print("CROSS REFFING SELE:", "selex",sele.x, "seley",sele.y, "TO", "selecteepathlist",i,"x:", sele.selectee.pathlist[i].x,"y: ", sele.selectee.pathlist[i].y)
+        if sele.selectee.pathlist[i].x == sele.x and sele.selectee.pathlist[i].y == sele.y:
+                print("incrementing b by 1")
+                b = 1
+    if b != 1:
+        print("IMPOSSIBLE MOVE")
+        return 1
+
+def pitcher(selectee,pathlist): # Sends the piece to the desired location
+    global piece29, piece30
+    a = 0
+    b = 0
     occupied_by_friendly = False
     occupied_by_enemy = False
     occupied_by_king = False
     oldx = selectee.x
     oldy = selectee.y
-    if selectee.team == "white":
-        king = piece29
-    if selectee.team == "black":
-        king = piece30
     matchfound = 0
+    if selectee.team == "white":
+        playerking = piece29
+    if selectee.team == "black":
+        playerking = piece30
+    
+    impossible = impossiblecheck()
+    if impossible == 1:
+        board.after(0, printimpossible)
+        return
+
     for i in range(0,len(piecelist)):
         if sele.x == piecelist[i].x and sele.y == piecelist[i].y:
             if selectee.team == piecelist[i].team:
@@ -350,7 +367,7 @@ def pitcher(selectee,pathlist,piece29,piece30,status): # Sends the piece to the 
                     occupied_by_king = True
                     
                 enemy = piecelist[i]
-    
+            
     if occupied_by_friendly == False :
         for i in range(0,len(pathlist_used)):
             if sele.x == pathlist_used[i].x and sele.y == pathlist_used[i].y:
@@ -367,53 +384,129 @@ def pitcher(selectee,pathlist,piece29,piece30,status): # Sends the piece to the 
                 sele.form = canvas.create_image(sele.x,sele.y, image=sele.selector)
                 break
         pathway_cleaner()
-
-    if occupied_by_enemy == True and matchfound == 1:
+    for i in range(0,len(piecelist)):
+        pathways(piecelist[i],"invis")
+    if occupied_by_enemy == True and matchfound == 1 and playerking.danger != "danger":
         enemy.x = -100
         enemy.y = -100
         canvas.moveto(enemy.form, -100,-100)
         if occupied_by_king == True:
             print("GAME OVER")
-    
+    status1 = dangerchecker() 
+    print(playerking.team,"STATUS OF THE PLAYER KING", playerking.danger)
     pathways(selectee,"invis")
     
-    status = dangerchecker(piece29,piece30,status) 
-    
-    if king.danger == "danger":
-        obj = selectee
-        obj.x = oldx
-        obj.y = oldy
-        canvas.moveto(obj.form, oldx-25, oldy-25)
-        canvas.moveto(flash_obj.form, -100, -100)
-        canvas.delete(sele.form)
-        sele.current_player, sele.waiting_player = sele.waiting_player, sele.current_player
-        sele.selector, sele.waiter = sele.waiter, sele.selector
-        sele.form = canvas.create_image(sele.x,sele.y, image=sele.selector)
-        pathway_cleaner()
-    print(status)
-    print("king.team =", king.team,"king.danger =", king.danger)
+    print("piece29.team =", piece29.team,"piece29.danger =", piece29.danger)
+    print("piece30.team =", piece30.team,"piece30.danger =", piece30.danger)
+    status2 = dangerchecker2(oldx,oldy,selectee)       
+    if status1 == "danger" and status2 != "invalid":
+        board.after(0, printcheck)
+        checkmatechecker()
+        
         
 
 pathlist_used = []
 pathlist = [path_box(-100,-100) for i in range(50)]
 
-def dangerchecker(piece29,piece30,status):
-    if sele.current_player == "black":
+def checkmatechecker():
+    for i in range(0,len(piecelist)):
+        pathways(piecelist[i],"invis")
+    if piece29.danger == "danger":
         king = piece29
-    if sele.current_player == "white":
+        enemylist = blacklist
+    if piece30.danger == "danger":
         king = piece30
+        enemylist = whitelist
+    print("PIECE29", piece29.danger)
+    print("PIECE30", piece30.danger)
+    waysfound = 0
+    if len(king.pathlist) == 0:
+        print("PATHLIST LENGTH 0")
+        return
+    for d in range(len(king.pathlist)):
+        for t in range(len(enemylist)):
+            for p in range(len(enemylist[t].pathlist)):
+                print("CHECKMATE CHECKER LOOP")
+                print("KING PATH", d,": X:", king.pathlist[d].x,", Y:", king.pathlist[d].y)
+                print("ENEMY", t,": X:", enemylist[t].pathlist[p].x,", Y:", enemylist[t].pathlist[p].y)
+                if king.pathlist[d].x == enemylist[t].pathlist[p].x and king.pathlist[d].y == enemylist[t].pathlist[p].y:
+                    print("ESCAPE ROUTE FOUND")
+                    waysfound += 1
+    if waysfound == 0:
+        print("GAME OVER")
+            
+
+def dangerchecker():
+    for i in range(0,len(piecelist)):
+        pathways(piecelist[i],"invis")
     for i in range(len(piecelist)):
         for d in range(len(piecelist[i].pathlist)):
             print(piecelist[i].pathlist[d].x, piecelist[i].pathlist[d].y)
-            if king.x == piecelist[i].pathlist[d].x and king.y == piecelist[i].pathlist[d].y:
+            if piece29.x == piecelist[i].pathlist[d].x and piece29.y == piecelist[i].pathlist[d].y:
                 print("DANGER FOUND IN DANGERCHECKER")
-                status = "danger"
-                king.danger = "danger"
-                return
+                piece29.danger = "danger"
+                return "danger"
             else:
-                king.danger = "clear"
+                piece29.danger = "clear"
                 print("CLEARRRRRR")
-                
+    for i in range(len(piecelist)):
+        for d in range(len(piecelist[i].pathlist)):
+            print(piecelist[i].pathlist[d].x, piecelist[i].pathlist[d].y)
+            if piece30.x == piecelist[i].pathlist[d].x and piece30.y == piecelist[i].pathlist[d].y:
+                print("DANGER FOUND IN DANGERCHECKER")
+                piece30.danger = "danger"
+                return "danger"
+            else:
+                piece30.danger = "clear"
+                print("CLEARRRRRR")
+
+
+def sendback(oldx, oldy, selectee):
+    obj = selectee
+    obj.x = oldx
+    obj.y = oldy
+    canvas.moveto(obj.form, oldx-25, oldy-25)
+    canvas.moveto(flash_obj.form, -100, -100)
+    canvas.delete(sele.form)
+    sele.current_player, sele.waiting_player = sele.waiting_player, sele.current_player
+    sele.selector, sele.waiter = sele.waiter, sele.selector
+    sele.form = canvas.create_image(sele.x,sele.y, image=sele.selector)
+    if selectee.team == "white":
+        piece29.danger = "clear"          
+    if selectee.team == "black":
+        piece30.danger = "clear"    
+
+def dangerchecker2(oldx, oldy, selectee):
+    a = 1
+    if piece29.danger == "danger":
+        if selectee.team == "white":
+            board.after(0, printinvalid)
+            sendback(oldx,oldy,selectee)
+            return "invalid"
+    if piece30.danger == "danger":
+        if selectee.team == "black":
+            board.after(0, printinvalid)
+            sendback(oldx,oldy,selectee)
+            return "invalid"
+    pathway_cleaner()        
+
+def printcheck():
+        checkrect = canvas.create_rectangle(100, 150, 300, 250, fill="orange")
+        text = canvas.create_text(200,200,text="CHECK", font=("Tahoma", 17))
+        board.after(1500, deleteinvalid, checkrect, text)
+        
+def printinvalid():
+        invalidrect = canvas.create_rectangle(100, 150, 300, 250, fill="orange")
+        text = canvas.create_text(200,200,text="CAN'T MOVE THERE,\n DANGER DETECTED", font=("Tahoma", 14))
+        board.after(2000, deleteinvalid, invalidrect, text)
+
+def printimpossible():
+        imposrect = canvas.create_rectangle(100, 150, 300, 250, fill="orange")
+        text = canvas.create_text(200,200,text="IMPOSSIBLE MOVE", font=("Tahoma", 14))
+        board.after(800, deleteinvalid, imposrect, text)
+
+def deleteinvalid(inv, txt):
+    canvas.delete(inv, txt)
     
 
 def pathways(obj, arg):
@@ -483,7 +576,10 @@ def pathways_placer(plist):
         pathlist.pop(0)
     
 piecelist = []
-status = "clear"
+whitelist = []
+blacklist = []
+status1 = 0
+status2 = 0
 
 piece66 = piece(225,225,"black", "pawn")
 piecelist.append(piece66)
@@ -531,7 +627,7 @@ piecelist.append(piece21)
 piecelist.append(piece22)
 piecelist.append(piece24)
 piecelist.append(piece25)
-# piecelist.append(piece23)
+piecelist.append(piece23)
 piecelist.append(piece26)
 piecelist.append(piece27)
 piecelist.append(piece28)
@@ -561,13 +657,18 @@ piecelist.append(piece18)
 piecelist.append(piece19)
 piecelist.append(piece20)
 
+for i in range(len(piecelist)):
+    if piecelist[i].team == "white":
+        whitelist.append(piecelist[i])
+    if piecelist[i].team == "black":
+        blacklist.append(piecelist[i])
+
 board.bind("<Right>", lambda x: mover(sele, x=50, y=0))
 board.bind("<Left>", lambda x: mover(sele, x=-50, y=0))
 board.bind("<Up>", lambda x: mover(sele, x=0, y=-50))
 board.bind("<Down>", lambda x: mover(sele, x=0, y=50))
-board.bind("x", lambda x: fetcher(sele, status))
-board.bind("d", lambda x: pitcher(sele.selectee,pathlist, piece29, piece30, status))
-board.bind("t", lambda x: print(status))
+board.bind("x", lambda x: fetcher(sele))
+board.bind("d", lambda x: pitcher(sele.selectee,pathlist))
 board.bind("y", lambda x: print("team", piece29.team, "status", piece29.danger))
 board.bind("u", lambda x: print("team", piece30.team, "status", piece30.danger))
 
