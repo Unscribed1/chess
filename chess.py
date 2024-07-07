@@ -339,6 +339,10 @@ def impossiblecheck():
 
 def pitcher(selectee,pathlist): # Sends the piece to the desired location
     global piece29, piece30
+    piece29.danger = "clear"
+    piece30.danger = "clear"
+    for i in range(0,len(piecelist)):
+        pathways(piecelist[i],"invis")
     a = 0
     b = 0
     occupied_by_friendly = False
@@ -364,8 +368,7 @@ def pitcher(selectee,pathlist): # Sends the piece to the desired location
             if selectee.team != piecelist[i].team:
                 occupied_by_enemy = True
                 if piecelist[i].ttype == "king":
-                    occupied_by_king = True
-                    
+                    occupied_by_king = True              
                 enemy = piecelist[i]
             
     if occupied_by_friendly == False :
@@ -373,6 +376,13 @@ def pitcher(selectee,pathlist): # Sends the piece to the desired location
             if sele.x == pathlist_used[i].x and sele.y == pathlist_used[i].y:
                 matchfound = 1
                 obj = selectee
+                if obj.ttype == "king" and obj.team == "white" and obj.firstmove == 1:        
+                    if sele.x == 325 and sele.y == 375:
+                        for i in range(len(obj.pathlist)):
+                            if obj.pathlist[i].x == 325 and obj.pathlist[i].y == 375:
+                                if obj.pathlist[i].castle == "ready":
+                                    piece18.x = 275
+                                    canvas.moveto(piece18.form, piece18.x-25, piece18.y-25)
                 obj.x = sele.x
                 obj.y = sele.y
                 obj.firstmove = 2
@@ -392,6 +402,8 @@ def pitcher(selectee,pathlist): # Sends the piece to the desired location
         canvas.moveto(enemy.form, -100,-100)
         if occupied_by_king == True:
             print("GAME OVER")
+    for i in range(0,len(piecelist)):
+        pathways(piecelist[i],"invis")
     status1 = dangerchecker() 
     print(playerking.team,"STATUS OF THE PLAYER KING", playerking.danger)
     pathways(selectee,"invis")
@@ -402,7 +414,6 @@ def pitcher(selectee,pathlist): # Sends the piece to the desired location
     if status1 == "danger" and status2 != "invalid":
         board.after(0, printcheck)
         checkmatechecker()
-        
         
 
 pathlist_used = []
@@ -517,10 +528,28 @@ def pathways(obj, arg):
             z = 2
         if obj.team == "white":
             north_recursion(obj, obj.x, obj.y, z, plist)
+            for i in range(len(piecelist)):
+                if piecelist[i].x == obj.x+50 and piecelist[i].y == obj.y-50:
+                    if piecelist[i].team != obj.team:
+                        coords = coordinates(obj.x+50,obj.y-50)
+                        plist.append(coords)  
+                if piecelist[i].x == obj.x-50 and piecelist[i].y == obj.y-50:
+                    if piecelist[i].team != obj.team:
+                        coords = coordinates(obj.x-50,obj.y-50)
+                        plist.append(coords)                      
             print(plist)
         if obj.team == "black":
             # nlist = north_recursion(obj.x, obj.y, 5, plist)
             south_recursion(obj, obj.x, obj.y, z, plist)
+            for i in range(len(piecelist)):
+                if piecelist[i].x == obj.x+50 and piecelist[i].y == obj.y+50:
+                    if piecelist[i].team != obj.team:
+                        coords = coordinates(obj.x+50,obj.y+50)
+                        plist.append(coords)  
+                if piecelist[i].x == obj.x-50 and piecelist[i].y == obj.y+50:
+                    if piecelist[i].team != obj.team:
+                        coords = coordinates(obj.x-50,obj.y+50)
+                        plist.append(coords)  
             print(plist)
     if obj.ttype == "rook":
         north_recursion(obj, obj.x, obj.y, 8, plist)
@@ -554,6 +583,21 @@ def pathways(obj, arg):
         northwest_recursion(obj, obj.x, obj.y, 1, plist)
         southwest_recursion(obj, obj.x, obj.y, 1, plist)
         southeast_recursion(obj, obj.x, obj.y, 1, plist)
+        if obj.team == "white": # castle white
+            if piece18.firstmove == 1 and piece29.firstmove == 1:
+                if piece22.x != 275 and piece22.y != 375:
+                    if piece31.x != 325 and piece31.y != 375:
+                        coords = coordinates(325,375)
+                        coords.castle = "ready"
+                        plist.append(coords)
+            if piece29.firstmove == 1 and piece17.firstmove == 1:
+                if piece28.x != 75 and piece28.y != 375:
+                    if piece21.x != 125 and piece21.y != 375:
+                        if piece26.x != 175 and piece26.y != 375:
+                            coords2 = coordinates(125,375)
+                            coords2.castle = "ready"
+                            plist.append(coords)                            
+                        
     if arg == "real":
         pathways_placer(plist)
     if arg == "invis":
