@@ -36,6 +36,7 @@ class coordinates():
         self.y = y
         self.team = "na"
         self.put = "na"
+        self.passant = 0
         
 class path_box():
     def __init__(self,x,y):
@@ -65,15 +66,15 @@ class flashbox():
         ############ RECURSIONS
 
 def north_recursion(obj, objx, objy, arg, xlist):
-    print("north recursion")
-    print("y start", objy)
+    # print("north recursion")
+    # print("y start", objy)
     arg += -1
     objy += -50
     for i in range(len(piecelist)):
         if objy < 25:
             return xlist
         if (objx == piecelist[i].x) and (objy == piecelist[i].y):
-            print("something found")
+            # print("something found")
             if obj.ttype == "pawn":
                 return xlist
             if obj.team != piecelist[i].team:
@@ -82,25 +83,25 @@ def north_recursion(obj, objx, objy, arg, xlist):
             return xlist
     coords = coordinates(objx,objy)
     xlist.append(coords)
-    print("y at the end of cycle:", objy)
-    print("xlist at the end of the cycle:")
-    for i in range(len(xlist)): 
-        print("list size:", len(xlist),"element:", xlist[i].x, xlist[i].y)
+    # print("y at the end of cycle:", objy)
+    # print("xlist at the end of the cycle:")
+    # for i in range(len(xlist)): 
+        # print("list size:", len(xlist),"element:", xlist[i].x, xlist[i].y)
     if arg != 0:
         north_recursion(obj, objx, objy, arg, xlist)
     else:
         return xlist
 
 def south_recursion(obj, objx, objy, arg, xlist):
-    print("south recursion")
-    print("y start", objy)
+    # print("south recursion")
+    # print("y start", objy)
     arg += -1
     objy += 50
     for i in range(len(piecelist)):
         if objy > 375:
             return xlist
         if (objx == piecelist[i].x) and (objy == piecelist[i].y):
-            print("something found")
+            # print("something found")
             if obj.ttype == "pawn":
                 return xlist
             if obj.team != piecelist[i].team:
@@ -109,60 +110,60 @@ def south_recursion(obj, objx, objy, arg, xlist):
             return xlist
     coords = coordinates(objx,objy)
     xlist.append(coords)
-    print("y at the end of cycle:", objy)
-    print("xlist at the end of the cycle:")
-    for i in range(len(xlist)): 
-        print("list size:", len(xlist),"element:", xlist[i].x, xlist[i].y)
+    # print("y at the end of cycle:", objy)
+    # print("xlist at the end of the cycle:")
+    # for i in range(len(xlist)): 
+        # print("list size:", len(xlist),"element:", xlist[i].x, xlist[i].y)
     if arg != 0:
         south_recursion(obj, objx, objy, arg, xlist)
     else:
         return xlist
 
 def east_recursion(obj, objx, objy, arg, xlist):
-    print("south recursion")
-    print("x start", x)
+    # print("south recursion")
+    # print("x start", x)
     arg += -1
     objx += 50
     for i in range(len(piecelist)):
         if objx > 375:
             return xlist
         if (objx == piecelist[i].x) and (objy == piecelist[i].y):
-            print("something found")
+            # print("something found")
             if obj.team != piecelist[i].team:
                 coords = coordinates(objx,objy)
                 xlist.append(coords)
             return xlist
     coords = coordinates(objx,objy)
     xlist.append(coords)
-    print("y at the end of cycle:", objy)
-    print("xlist at the end of the cycle:")
-    for i in range(len(xlist)): 
-        print("list size:", len(xlist),"element:", xlist[i].x, xlist[i].y)
+    # print("y at the end of cycle:", objy)
+    # print("xlist at the end of the cycle:")
+    # for i in range(len(xlist)): 
+        # print("list size:", len(xlist),"element:", xlist[i].x, xlist[i].y)
     if arg != 0:
         east_recursion(obj, objx, objy, arg, xlist)
     else:
         return xlist
 
 def west_recursion(obj, objx, objy, arg, xlist):
-    print("south recursion")
-    print("x start", x)
+    # print("south recursion")
+    # print("x start", x)
     arg += -1
     objx += -50
     for i in range(len(piecelist)):
         if objx < 25:
             return xlist
         if (objx == piecelist[i].x) and (objy == piecelist[i].y):
-            print("something found")
+            # print("something found")
             if obj.team != piecelist[i].team:
                 coords = coordinates(objx,objy)
                 xlist.append(coords)
             return xlist
     coords = coordinates(objx,objy)
     xlist.append(coords)
-    print("y at the end of cycle:", objy)
-    print("xlist at the end of the cycle:")
-    for i in range(len(xlist)): 
-        print("list size:", len(xlist),"element:", xlist[i].x, xlist[i].y)
+    # print("y at the end of cycle:", objy)
+    # print("xlist at the end of the cycle:")
+    # for i in range(len(xlist)): 
+        # print("list size:", len(xlist),"element:", xlist[i].x, xlist[i].y)
     if arg != 0:
         west_recursion(obj, objx, objy, arg, xlist)
     else:
@@ -329,12 +330,12 @@ def impossiblecheck():
     c = len(sele.selectee.pathlist)
     b = 0
     for i in range(len(sele.selectee.pathlist)):
-        print("CROSS REFFING SELE:", "selex",sele.x, "seley",sele.y, "TO", "selecteepathlist",i,"x:", sele.selectee.pathlist[i].x,"y: ", sele.selectee.pathlist[i].y)
+        # print("CROSS REFFING SELE:", "selex",sele.x, "seley",sele.y, "TO", "selecteepathlist",i,"x:", sele.selectee.pathlist[i].x,"y: ", sele.selectee.pathlist[i].y)
         if sele.selectee.pathlist[i].x == sele.x and sele.selectee.pathlist[i].y == sele.y:
-                print("incrementing b by 1")
+                # print("incrementing b by 1")
                 b = 1
     if b != 1:
-        print("IMPOSSIBLE MOVE")
+        # print("IMPOSSIBLE MOVE")
         return 1
 
 def pitcher(selectee,pathlist): # Sends the piece to the desired location
@@ -350,6 +351,7 @@ def pitcher(selectee,pathlist): # Sends the piece to the desired location
     occupied_by_king = False
     oldx = selectee.x
     oldy = selectee.y
+    oldfirstmove = selectee.firstmove
     matchfound = 0
     if selectee.team == "white":
         playerking = piece29
@@ -376,6 +378,19 @@ def pitcher(selectee,pathlist): # Sends the piece to the desired location
             if sele.x == pathlist_used[i].x and sele.y == pathlist_used[i].y:
                 matchfound = 1
                 obj = selectee
+                for i in range(len(obj.pathlist)):
+                    if obj.team == "white":
+                        if obj.pathlist[i].passant != 0:
+                            if obj.pathlist[i].passant.x == sele.x and obj.pathlist[i].passant.y-50 == sele.y:
+                                obj.pathlist[i].passant.x = -100
+                                obj.pathlist[i].passant.y = -100
+                                canvas.moveto(obj.pathlist[i].passant.form, obj.pathlist[i].passant.x-100, obj.pathlist[i].passant.y-100)
+                    if obj.team == "black":
+                        if obj.pathlist[i].passant != 0:
+                            if obj.pathlist[i].passant.x == sele.x and obj.pathlist[i].passant.y+50 == sele.y:
+                                obj.pathlist[i].passant.x = -100
+                                obj.pathlist[i].passant.y = -100
+                                canvas.moveto(obj.pathlist[i].passant.form, obj.pathlist[i].passant.x-100, obj.pathlist[i].passant.y-100)                                
                 if obj.ttype == "king" and obj.team == "white" and obj.firstmove == 1:        
                     if sele.x == 325 and sele.y == 375:
                         for i in range(len(obj.pathlist)):
@@ -383,9 +398,27 @@ def pitcher(selectee,pathlist): # Sends the piece to the desired location
                                 if obj.pathlist[i].castle == "ready":
                                     piece18.x = 275
                                     canvas.moveto(piece18.form, piece18.x-25, piece18.y-25)
+                    if sele.x == 125 and sele.y == 375:
+                        for i in range(len(obj.pathlist)):
+                            if obj.pathlist[i].x == 125 and obj.pathlist[i].y == 375:
+                                if obj.pathlist[i].castle == "ready":
+                                    piece17.x = 175
+                                    canvas.moveto(piece17.form, piece17.x-25, piece17.y-25)
+                if obj.ttype == "king" and obj.team == "black" and obj.firstmove == 1:        
+                    if sele.x == 325 and sele.y == 25:
+                        for i in range(len(obj.pathlist)):
+                            if obj.pathlist[i].x == 325 and obj.pathlist[i].y == 25:
+                                if obj.pathlist[i].castle == "ready":
+                                    piece20.x = 275
+                                    canvas.moveto(piece20.form, piece20.x-25, piece20.y-25)
+                    if sele.x == 125 and sele.y == 25:
+                        for i in range(len(obj.pathlist)):
+                            if obj.pathlist[i].x == 125 and obj.pathlist[i].y == 25:
+                                if obj.pathlist[i].castle == "ready":
+                                    piece19.x = 175
+                                    canvas.moveto(piece19.form, piece19.x-25, piece19.y-25)
                 obj.x = sele.x
                 obj.y = sele.y
-                obj.firstmove = 2
                 canvas.moveto(obj.form, obj.x-25, obj.y-25)
                 canvas.moveto(flash_obj.form, -100, -100)
                 canvas.delete(sele.form)
@@ -400,17 +433,20 @@ def pitcher(selectee,pathlist): # Sends the piece to the desired location
         enemy.x = -100
         enemy.y = -100
         canvas.moveto(enemy.form, -100,-100)
-        if occupied_by_king == True:
-            print("GAME OVER")
+        # if occupied_by_king == True: probably redundant, delete later
+            # print("GAME OVER")
     for i in range(0,len(piecelist)):
         pathways(piecelist[i],"invis")
     status1 = dangerchecker() 
-    print(playerking.team,"STATUS OF THE PLAYER KING", playerking.danger)
+    # print(playerking.team,"STATUS OF THE PLAYER KING", playerking.danger)
     pathways(selectee,"invis")
-    
-    print("piece29.team =", piece29.team,"piece29.danger =", piece29.danger)
-    print("piece30.team =", piece30.team,"piece30.danger =", piece30.danger)
-    status2 = dangerchecker2(oldx,oldy,selectee)       
+    # print("piece29.team =", piece29.team,"piece29.danger =", piece29.danger)
+    # print("piece30.team =", piece30.team,"piece30.danger =", piece30.danger)
+    status2 = dangerchecker2(oldx,oldy,selectee)
+    # print("FIRSTMOVE STATUS", obj.firstmove)
+    if status1 != "danger":
+        if obj.firstmove == 1:
+            obj.firstmove = 2
     if status1 == "danger" and status2 != "invalid":
         board.after(0, printcheck)
         checkmatechecker()
@@ -420,6 +456,7 @@ pathlist_used = []
 pathlist = [path_box(-100,-100) for i in range(50)]
 
 def checkmatechecker():
+    attackerlist = []
     for i in range(0,len(piecelist)):
         pathways(piecelist[i],"invis")
     if piece29.danger == "danger":
@@ -428,23 +465,40 @@ def checkmatechecker():
     if piece30.danger == "danger":
         king = piece30
         enemylist = whitelist
-    print("PIECE29", piece29.danger)
-    print("PIECE30", piece30.danger)
-    waysfound = 0
-    if len(king.pathlist) == 0:
-        print("PATHLIST LENGTH 0")
-        return
+    # print("PIECE29", piece29.danger)
+    # print("PIECE30", piece30.danger)
+    waysfound = len(king.pathlist) 
+    # if len(king.pathlist) == 0: cant remember why this was here
+        # print("PATHLIST LENGTH 0")
+        # return
+    # print("length of the king pathlist", len(king.pathlist))
     for d in range(len(king.pathlist)):
         for t in range(len(enemylist)):
             for p in range(len(enemylist[t].pathlist)):
-                print("CHECKMATE CHECKER LOOP")
-                print("KING PATH", d,": X:", king.pathlist[d].x,", Y:", king.pathlist[d].y)
-                print("ENEMY", t,": X:", enemylist[t].pathlist[p].x,", Y:", enemylist[t].pathlist[p].y)
+                # print("CHECKMATE CHECKER LOOP")
+                # print("KING PATH", d,": X:", king.pathlist[d].x,", Y:", king.pathlist[d].y)
+                # print("ENEMY", t,": X:", enemylist[t].pathlist[p].x,", Y:", enemylist[t].pathlist[p].y)
                 if king.pathlist[d].x == enemylist[t].pathlist[p].x and king.pathlist[d].y == enemylist[t].pathlist[p].y:
-                    print("ESCAPE ROUTE FOUND")
-                    waysfound += 1
-    if waysfound == 0:
-        print("GAME OVER")
+                    # print("ESCAPE ROUTE BLOCKED")
+                    attackerlist.append(enemylist[t])
+                    waysfound -= 1
+    print("WAYS AT THE END OF THE FIRST LOOP", waysfound)
+    if waysfound <= 0:
+        waysfound = 0
+        for i in range(len(attackerlist)):
+            for g in range(len(attackerlist[i].pathlist)):
+                for t in range(len(whitelist)):
+                    for p in range(len(whitelist[t].pathlist)):
+                        if attackerlist[i].pathlist[g].x == whitelist[t].pathlist[p].x and attackerlist[i].pathlist[g].y == whitelist[t].pathlist[p].y:
+                            waysfound += 1                                                
+                        # for i in range(len(king.pathlist)):
+                            # for d in range(len(whitelist)):
+                                # for t in range(len(whitelist.pathlist)):
+                                    # if king.pathlist[i].x == whitelist[d].pathlist[t].x and king.pathlist[i].y == whitelist[d].pathlist[t].y:
+                                        # waysfound += 1
+    if waysfound < 0:
+        print("GAME OVER ")
+    print("AMOUNT OF WAYS FOUND AT THE END OF THE SECOND LOOP",waysfound)
             
 
 def dangerchecker():
@@ -452,24 +506,24 @@ def dangerchecker():
         pathways(piecelist[i],"invis")
     for i in range(len(piecelist)):
         for d in range(len(piecelist[i].pathlist)):
-            print(piecelist[i].pathlist[d].x, piecelist[i].pathlist[d].y)
+            # print(piecelist[i].pathlist[d].x, piecelist[i].pathlist[d].y)
             if piece29.x == piecelist[i].pathlist[d].x and piece29.y == piecelist[i].pathlist[d].y:
-                print("DANGER FOUND IN DANGERCHECKER")
+                # print("DANGER FOUND IN DANGERCHECKER")
                 piece29.danger = "danger"
                 return "danger"
             else:
                 piece29.danger = "clear"
-                print("CLEARRRRRR")
+                # print("CLEARRRRRR")
     for i in range(len(piecelist)):
         for d in range(len(piecelist[i].pathlist)):
-            print(piecelist[i].pathlist[d].x, piecelist[i].pathlist[d].y)
+            # print(piecelist[i].pathlist[d].x, piecelist[i].pathlist[d].y)
             if piece30.x == piecelist[i].pathlist[d].x and piece30.y == piecelist[i].pathlist[d].y:
-                print("DANGER FOUND IN DANGERCHECKER")
+                # print("DANGER FOUND IN DANGERCHECKER")
                 piece30.danger = "danger"
                 return "danger"
             else:
                 piece30.danger = "clear"
-                print("CLEARRRRRR")
+                # print("CLEARRRRRR")
 
 
 def sendback(oldx, oldy, selectee):
@@ -492,7 +546,7 @@ def dangerchecker2(oldx, oldy, selectee):
     if piece29.danger == "danger":
         if selectee.team == "white":
             board.after(0, printinvalid)
-            sendback(oldx,oldy,selectee)
+            sendback(oldx,oldy, selectee)
             return "invalid"
     if piece30.danger == "danger":
         if selectee.team == "black":
@@ -536,7 +590,17 @@ def pathways(obj, arg):
                 if piecelist[i].x == obj.x-50 and piecelist[i].y == obj.y-50:
                     if piecelist[i].team != obj.team:
                         coords = coordinates(obj.x-50,obj.y-50)
-                        plist.append(coords)                      
+                        plist.append(coords)  
+                if obj.y == 175: # WHITE PASSANT
+                    if piecelist[i].team != obj.team:
+                        if piecelist[i].y == 175 and piecelist[i].x == obj.x-50:
+                            coords = coordinates(obj.x-50,obj.y-50)
+                            coords.passant = piecelist[i]
+                            plist.append(coords)
+                        if piecelist[i].y == 175 and piecelist[i].x == obj.x+50:
+                            coords = coordinates(obj.x+50,obj.y-50)
+                            coords.passant = piecelist[i]
+                            plist.append(coords)                                  
             print(plist)
         if obj.team == "black":
             # nlist = north_recursion(obj.x, obj.y, 5, plist)
@@ -549,7 +613,17 @@ def pathways(obj, arg):
                 if piecelist[i].x == obj.x-50 and piecelist[i].y == obj.y+50:
                     if piecelist[i].team != obj.team:
                         coords = coordinates(obj.x-50,obj.y+50)
-                        plist.append(coords)  
+                        plist.append(coords) 
+                if obj.y == 225: # BLACK PASSANT
+                    if piecelist[i].team != obj.team:
+                        if piecelist[i].y == 225 and piecelist[i].x == obj.x-50:
+                            coords = coordinates(obj.x-50,obj.y+50)
+                            coords.passant = piecelist[i]
+                            plist.append(coords)
+                        if piecelist[i].y == 225 and piecelist[i].x == obj.x+50:
+                            coords = coordinates(obj.x+50,obj.y+50)
+                            coords.passant = piecelist[i]
+                            plist.append(coords)                         
             print(plist)
     if obj.ttype == "rook":
         north_recursion(obj, obj.x, obj.y, 8, plist)
@@ -584,20 +658,33 @@ def pathways(obj, arg):
         southwest_recursion(obj, obj.x, obj.y, 1, plist)
         southeast_recursion(obj, obj.x, obj.y, 1, plist)
         if obj.team == "white": # castle white
-            if piece18.firstmove == 1 and piece29.firstmove == 1:
-                if piece22.x != 275 and piece22.y != 375:
-                    if piece31.x != 325 and piece31.y != 375:
+            if piece18.firstmove == 1 and piece29.firstmove == 1: # right
+                if piece22.x != 275 or piece22.y != 375:
+                    if piece31.x != 325 or piece31.y != 375:
                         coords = coordinates(325,375)
                         coords.castle = "ready"
                         plist.append(coords)
-            if piece29.firstmove == 1 and piece17.firstmove == 1:
-                if piece28.x != 75 and piece28.y != 375:
-                    if piece21.x != 125 and piece21.y != 375:
-                        if piece26.x != 175 and piece26.y != 375:
+            if piece29.firstmove == 1 and piece17.firstmove == 1: # left
+                if piece28.x != 75 or piece28.y != 375:
+                    if piece21.x != 125 or piece21.y != 375:
+                        if piece26.x != 175 or piece26.y != 375:
                             coords2 = coordinates(125,375)
                             coords2.castle = "ready"
-                            plist.append(coords)                            
-                        
+                            plist.append(coords2)                                   
+        if obj.team == "black": # castle black
+            if piece20.firstmove == 1 and piece30.firstmove == 1: # right
+                if piece33.x != 325 or piece33.y != 25:
+                    if piece25.x != 275 or piece25.y != 25:
+                        coords = coordinates(325,25)
+                        coords.castle = "ready"
+                        plist.append(coords)
+            if piece19.firstmove == 1 and piece30.firstmove == 1: # left
+                if piece27.x != 175 or piece27.y != 25:
+                    if piece24.x != 125 or piece24.y != 25:
+                        if piece32.x != 75 or piece26.y != 25:
+                            coords2 = coordinates(125,25)
+                            coords2.castle = "ready"
+                            plist.append(coords2)                        
     if arg == "real":
         pathways_placer(plist)
     if arg == "invis":
@@ -625,8 +712,6 @@ blacklist = []
 status1 = 0
 status2 = 0
 
-piece66 = piece(225,225,"black", "pawn")
-piecelist.append(piece66)
 piece1 = piece(25,75,"black", "pawn")
 piece2 = piece(75,75,"black", "pawn")
 piece3 = piece(125,75,"black", "pawn")
