@@ -445,8 +445,8 @@ def impossiblecheck():
 
 def pitcher(selectee,pathlist): # Sends the piece to the desired location
     global piece29, piece30
-    piece29.danger = "clear"
-    piece30.danger = "clear"
+    # piece29.danger = "clear"
+    # piece30.danger = "clear"
     for i in range(0,len(piecelist)):
         pathways(piecelist[i],"invis")
     a = 0
@@ -460,8 +460,10 @@ def pitcher(selectee,pathlist): # Sends the piece to the desired location
     matchfound = 0
     if selectee.team == "white":
         playerking = piece29
+        enemyking = piece30
     if selectee.team == "black":
         playerking = piece30
+        enemyking = piece29
     
     impossible = impossiblecheck()
     if impossible == 1:
@@ -534,12 +536,21 @@ def pitcher(selectee,pathlist): # Sends the piece to the desired location
         pathway_cleaner()
     for i in range(0,len(piecelist)):
         pathways(piecelist[i],"invis")
+    if "enemy" in locals():
+        print("TRIGGERED")
+        print("occupied_by_enemy:", occupied_by_enemy,"matchfound:", matchfound,"playerking.danger", playerking.danger, "sele.x", sele.x,"sele.y", sele.y)
+        if occupied_by_enemy == True and matchfound == 1 and (piece29.danger or piece30.danger) == "danger" and sele.x == enemy.x and sele.y == enemy.y:
+            print("TRIGGERED2")
+            enemy.x = -100
+            enemy.y = -100
+            canvas.moveto(enemy.form, -100,-100)
+    for i in range(0,len(piecelist)):
+        pathways(piecelist[i],"invis")
+    status1 = dangerchecker() # this might mess something up
     if occupied_by_enemy == True and matchfound == 1 and playerking.danger != "danger":
         enemy.x = -100
         enemy.y = -100
         canvas.moveto(enemy.form, -100,-100)
-        # if occupied_by_king == True: probably redundant, delete later
-            # print("GAME OVER")
     for i in range(0,len(piecelist)):
         pathways(piecelist[i],"invis")
     status1 = dangerchecker() 
@@ -593,36 +604,57 @@ pseudo_pathlist = [pseudo_path_box(-100,-100) for i in range(80)]
         # print("GAME OVER ")
     # print("AMOUNT OF WAYS FOUND AT THE END OF THE SECOND LOOP",waysfound)
 
-def attackerloopback(king, attacker):
-    xlist = []
-    n = 0
-    s = 0
-    e = 0
-    w = 0
-    if attacker.x > king.x:
-        e = 1
-    if attacker.x < king.x:
-        w = 1
-    if attacker.y > king.y:
-        s = 1
-    if attacker.y < king.y:
-        n = 1
-    if n == 1 and (0 = e and w): # attack from north
-        pass
-    if s == 1 and (0 = e and w): # attack from south
-        pass
-    if e == 1 and (0 = n and s): # attack from east
-        pass
-    if w == 1 and (0 = n and s): # attack from west
-        pass
-    if n == 1 and w == 1: # attack from northwest
-        pass
-    if n == 1 and e == 1: # attack from northeast
-        pass
-    if s == 1 and w == 1: # attack from southwest
-        pass
-    if s == 1 and e == 1: # attack from southeast
-        pass
+# def attackerloopback(king, attacker):
+    # xlist = []
+    # counter = 0
+    # n = 0
+    # s = 0
+    # e = 0
+    # w = 0
+    # if attacker.x > king.x:
+        # e = 1
+    # if attacker.x < king.x:
+        # w = 1
+    # if attacker.y > king.y:
+        # s = 1
+    # if attacker.y < king.y:
+        # n = 1
+    # if n == 1 and (0 == e and w): # attack from north
+        # pass
+    # if s == 1 and (0 == e and w): # attack from south
+        # pass
+    # if e == 1 and (0 == n and s): # attack from east
+        # pass
+    # if w == 1 and (0 == n and s): # attack from west
+        # pass
+    # if n == 1 and w == 1: # attack from northwest
+        # pass
+    # if n == 1 and e == 1: # attack from northeast
+        # pass
+    # if s == 1 and w == 1: # attack from southwest
+        # pass
+    # if s == 1 and e == 1: # attack from southeast
+        # pass
+    # return xlist
+        
+    
+def attackerloopback(king, attacker, argx, argy, atkdirection, xlist):
+    if argy == king.y and argx == king.x:
+        return xlist
+    if king.y > attacker.y:
+        argy += 50
+    if king.y < atacker.y:
+        argy -= 50
+    if king.x > attacker.x:
+        argx += 50
+    if king.x < attacker.x:
+        argx -= 50
+    for i in range(len(attacker.pathlist)):
+        if attacker.pathlist[i].x == argx and attacker.pathlist[i].y == argy:
+            xlist.append(attacker.pathlist[i])
+    attackerloopback2(king, attacker, argx, argy, atkdirection, xlist)
+    
+
 
 def checkmatechecker():
     for i in range(0,len(piecelist)):
@@ -668,9 +700,9 @@ def dangerchecker():
         for d in range(len(piecelist[i].pathlist)):
             if piecelist[i].pathlist[d].pseudo == "na":
                 if piece29.x == piecelist[i].pathlist[d].x and piece29.y == piecelist[i].pathlist[d].y:
-                    # print("DANGER FOUND IN DANGERCHECKER")
-                    piece29.danger = "danger"
-                    return "danger"
+                    if piece29.team != piecelist[i].team:   
+                        piece29.danger = "danger"
+                        return "danger"
                 else:
                     piece29.danger = "clear"
                     # print("CLEARRRRRR")
@@ -678,9 +710,9 @@ def dangerchecker():
         for d in range(len(piecelist[i].pathlist)):
             if piecelist[i].pathlist[d].pseudo == "na":
                 if piece30.x == piecelist[i].pathlist[d].x and piece30.y == piecelist[i].pathlist[d].y:
-                    # print("DANGER FOUND IN DANGERCHECKER")
-                    piece30.danger = "danger"
-                    return "danger"
+                    if piece30.team != piecelist[i].team:
+                        piece30.danger = "danger"
+                        return "danger"
                 else:
                     piece30.danger = "clear"
                     # print("CLEARRRRRR")
