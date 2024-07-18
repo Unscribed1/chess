@@ -29,6 +29,7 @@ class piece():
         self.danger = 0
         self.ttype = ttype
         self.form = True
+        self.exchangee = False
 
 class coordinates():
     def __init__(self,x,y):
@@ -37,6 +38,7 @@ class coordinates():
         self.team = "na"
         self.put = "na"
         self.pseudo = "na"
+        self.kingpath = "safe" # relevant for kings only
         self.passant = 0
         
 class path_box():
@@ -409,17 +411,26 @@ def piece_initialiser(obj):
         if obj.ttype == "king":
             obj.ogpiece = PhotoImage(file="white_king.png")
             obj.form = canvas.create_image(obj.x,obj.y, image=obj.ogpiece)
-            
+
+moverx1 = 0
+moverx2 = 400
+movery1 = 0
+movery2 = 400 
+scope_pawn = 0
+     # 100, 150, 300, 250
 def mover(sele, x, y): # moves the selector
+    global moverx1, moverx2, movery1, movery2
     canvas.move(sele.form, x, y)
     sele.x += x
     sele.y += y
-    if sele.x not in range (0,400) or sele.y not in range(0,400):
-        canvas.moveto(sele.form, 0, 0)
-        sele.x = 25
-        sele.y = 25
+    if sele.x not in range (moverx1,moverx2) or sele.y not in range(movery1,movery2):
+        canvas.moveto(sele.form, 100, 150)
+        sele.x = 100
+        sele.y = 150
 
 def fetcher(sele): # selects a piece
+    global scope_pawn, rect
+    print("this is the scope pawn", scope_pawn)
     pathway_cleaner()
     for i in range(0,len(piecelist)):
         if sele.x == piecelist[i].x and sele.y == piecelist[i].y:
@@ -429,6 +440,13 @@ def fetcher(sele): # selects a piece
                 yf = piecelist[i].y
                 sele.selectee = piecelist[i]
                 canvas.moveto(flash_obj.form, xf-25, yf-25)
+                print(piecelist[i].exchangee)
+                if piecelist[i].exchangee == True:
+                    print("we are here")
+                    scope_pawn.ttype = piecelist[i].ttype
+                    canvas.delete(scope_pawn.form)
+                    delete_pawn4piece()
+                    piece_initialiser(scope_pawn)                 
                 return piecelist[i]
 
 def impossiblecheck():
@@ -461,9 +479,13 @@ def pitcher(selectee,pathlist): # Sends the piece to the desired location
     if selectee.team == "white":
         playerking = piece29
         enemyking = piece30
+        teamlist = whitelist
+        enemylist = blacklist
     if selectee.team == "black":
         playerking = piece30
         enemyking = piece29
+        teamlist = blacklist
+        enemylist = whitelist
     
     impossible = impossiblecheck()
     if impossible == 1:
@@ -538,18 +560,24 @@ def pitcher(selectee,pathlist): # Sends the piece to the desired location
         pathways(piecelist[i],"invis")
     if "enemy" in locals():
         print("TRIGGERED")
-        print("occupied_by_enemy:", occupied_by_enemy,"matchfound:", matchfound,"playerking.danger", playerking.danger, "sele.x", sele.x,"sele.y", sele.y)
-        if occupied_by_enemy == True and matchfound == 1 and (piece29.danger or piece30.danger) == "danger" and sele.x == enemy.x and sele.y == enemy.y:
+        if occupied_by_enemy == True and matchfound == 1 and ((piece29.danger == "danger") or (piece30.danger == "danger")) and sele.x == enemy.x and sele.y == enemy.y:
             print("TRIGGERED2")
             enemy.x = -100
             enemy.y = -100
-            canvas.moveto(enemy.form, -100,-100)
+            canvas.moveto(enemy.form, -100,-100)  
+            piece29.danger = "clear"
+            piece30.danger = "clear"
+            for i in range(0,len(piecelist)):
+                pathways(piecelist[i],"invis")
+            status1 = dangerchecker() # this might mess something up
+            return
     for i in range(0,len(piecelist)):
         pathways(piecelist[i],"invis")
     status1 = dangerchecker() # this might mess something up
     if occupied_by_enemy == True and matchfound == 1 and playerking.danger != "danger":
         enemy.x = -100
         enemy.y = -100
+        enemy.firstmove == 2
         canvas.moveto(enemy.form, -100,-100)
     for i in range(0,len(piecelist)):
         pathways(piecelist[i],"invis")
@@ -566,12 +594,15 @@ def pitcher(selectee,pathlist): # Sends the piece to the desired location
     if status1 == "danger" and status2 != "invalid":
         board.after(0, printcheck)
         checkmatechecker()
+    stalematechecker(enemyking, enemylist, teamlist)
+    exchangechecker(obj)
         
 
 pathlist_used = []
 pseudo_pathlist_used = []
 pathlist = [path_box(-100,-100) for i in range(80)]
 pseudo_pathlist = [pseudo_path_box(-100,-100) for i in range(80)]
+
 
 # def checkmatechecker():
     # attackerlist = []
@@ -638,25 +669,33 @@ pseudo_pathlist = [pseudo_path_box(-100,-100) for i in range(80)]
     # return xlist
         
     
-def attackerloopback(king, attacker, argx, argy, atkdirection, xlist):
+def attackerloopback(king, attacker, argx, argy, xlist):
     if argy == king.y and argx == king.x:
+        xlist.pop()
+        for i in range(len(xlist)):
+            print(xlist[i].x, xlist[i].y)
+        print("THIS IS THE XLIST")
         return xlist
-    if king.y > attacker.y:
+    if king.y > attacker.y: # north attack
         argy += 50
-    if king.y < atacker.y:
+    if king.y < attacker.y: # south attack
         argy -= 50
-    if king.x > attacker.x:
+    if king.x > attacker.x: # west attack
         argx += 50
-    if king.x < attacker.x:
+    if king.x < attacker.x: # north attack
         argx -= 50
+    x1 = argx
+    y1 = argy
     for i in range(len(attacker.pathlist)):
         if attacker.pathlist[i].x == argx and attacker.pathlist[i].y == argy:
+            print("engaged at", x1, y1)
             xlist.append(attacker.pathlist[i])
-    attackerloopback2(king, attacker, argx, argy, atkdirection, xlist)
+    attackerloopback(king, attacker, argx, argy, xlist)
     
 
 
 def checkmatechecker():
+    newlist = []
     for i in range(0,len(piecelist)):
         pathways(piecelist[i],"invis")
     if piece29.danger == "danger":
@@ -672,26 +711,70 @@ def checkmatechecker():
         for d in range(len(enemylist[i].pathlist)):
                 if enemylist[i].pathlist[d].x == king.x and enemylist[i].pathlist[d].y == king.y:
                         attacker = enemylist[i]
-                        print("ATTACKER LOCATED")
+                        print("ATTACKER LOCATED AT", enemylist[i].x, enemylist[i].y, "whilst king is", king.x, king.y)
+    # for d in range(len(king.pathlist)): # loop to check every possible pathway of the king against every possible pathway(na/pseudo) of the enemies
+        # for t in range(len(enemylist)):
+            # for p in range(len(enemylist[t].pathlist)): # (king pseudo pathways? don't think they're possible but keep this in mind in case problems arise)
+                # if king.pathlist[d].x == enemylist[t].pathlist[p].x and king.pathlist[d].y == enemylist[t].pathlist[p].y:
+                    # waysfound -= 1
     for d in range(len(king.pathlist)): # loop to check every possible pathway of the king against every possible pathway(na/pseudo) of the enemies
         for t in range(len(enemylist)):
             for p in range(len(enemylist[t].pathlist)): # (king pseudo pathways? don't think they're possible but keep this in mind in case problems arise)
                 if king.pathlist[d].x == enemylist[t].pathlist[p].x and king.pathlist[d].y == enemylist[t].pathlist[p].y:
-                    waysfound -= 1
+                    king.pathlist[d].kingpath = "danger"
+    for d in range(len(king.pathlist)):
+        if king.pathlist[d].kingpath == "danger":
+            waysfound -= 1
+    for d in range(len(king.pathlist)):
+        if king.pathlist[d].pseudo == "pseudo":
+            waysfound -= 1
     print("WAYS AT THE END OF THE FIRST LOOP", waysfound)
     if waysfound <= 0:
         waysfound = 0
+    attackerloopback(king, attacker, attacker.x, attacker.y, newlist)
+    print("this is xlist", newlist)
     for i in range(len(allylist)): # loop to check the attacking pathway 
         for d in range(len(allylist[i].pathlist)):
-            for p in range(len(attacker.pathlist)):
+            for p in range(len(newlist)):
                 if allylist[i].pathlist[d].pseudo == "na" and attacker.pathlist[p].pseudo == "na":
-                    if allylist[i].pathlist[d].x == attacker.pathlist[p].x and allylist[i].pathlist[d].y == attacker.pathlist[p].y:
-                        waysfound += 1            
+                    if allylist[i].pathlist[d].x == newlist[p].x and allylist[i].pathlist[d].y == newlist[p].y:
+                        if allylist[i].pathlist[d].x != allylist[i].x and allylist[i].pathlist[d].y != allylist[i].y:
+                            if allylist[i].ttype != "king":
+                                print("THIS IS THE PATHWAY FOUND:", allylist[i].ttype, allylist[i].pathlist[d].x, allylist[i].pathlist[d].y) 
+                                waysfound += 1            
     if waysfound <= 0:
         print("GAME OVER")
+        if king == piece30:
+            board.after(0, printwhitewins)
+        if king == piece29:
+            board.after(0, printblackwins)
     print("POTENTIAL PATHWAYS OF THE KING", len(king.pathlist))
     print("AMOUNT OF WAYS FOUND AT THE END OF THE SECOND LOOP",waysfound)
-            
+
+def stalematechecker(king, teamlist, enemylist):
+    for i in range(len(teamlist)):
+        if len(teamlist[i].pathlist) > 0: # if the length of any of the pieces is greater than 0 and the piece is not the king, then it's logical that a stalemate is impossible
+            if teamlist[i].ttype != "king":
+                return
+            else:
+                print("WE'RE AT THE ELSE PHASE")
+                waysfound = len(king.pathlist)
+                for d in range(len(king.pathlist)):
+                    for t in range(len(enemylist)):
+                        for p in range(len(enemylist[t].pathlist)):
+                            if king.pathlist[d].x == enemylist[t].pathlist[p].x and king.pathlist[d].y == enemylist[t].pathlist[p].y:
+                                if enemylist[t].pathlist[p].pseudo == "na":
+                                    print("KINGPATH DANGER")
+                                    king.pathlist[d].kingpath = "danger"
+                for d in range(len(king.pathlist)):
+                    if king.pathlist[d].kingpath == "danger":
+                        print("DEDUCTING WAYS FOUND")
+                        waysfound -= 1
+                print("WAYS FOUND AT THE END:", waysfound)
+                if waysfound == 0:
+                    board.after(0, printstalemate)
+                   
+                    
 
 def dangerchecker():
     for i in range(0,len(piecelist)):
@@ -761,6 +844,85 @@ def printimpossible():
         imposrect = canvas.create_rectangle(100, 150, 300, 250, fill="orange")
         text = canvas.create_text(200,200,text="IMPOSSIBLE MOVE", font=("Tahoma", 14))
         board.after(800, deleteinvalid, imposrect, text)
+        
+def printwhitewins():
+        invalidrect = canvas.create_rectangle(100, 150, 300, 250, fill="orange")
+        text = canvas.create_text(200,200,text="WHITE WINS", font=("Tahoma", 14))
+        board.after(55000, deleteinvalid, invalidrect, text)
+
+def printstalemate():
+        invalidrect = canvas.create_rectangle(100, 150, 300, 250, fill="orange")
+        text = canvas.create_text(200,200,text="STALEMATE", font=("Tahoma", 14))
+        board.after(55000, deleteinvalid, invalidrect, text)
+        
+def printblackwins():
+        invalidrect = canvas.create_rectangle(100, 150, 300, 250, fill="orange")
+        text = canvas.create_text(200,200,text="BLACK WINS", font=("Tahoma", 14))
+        board.after(55000, deleteinvalid, invalidrect, text)
+
+def exchangechecker(pawn):
+    if pawn.team == "white":
+        if pawn.y == 25:
+            pawn4piece(pawn)
+    if pawn.team == "black":
+        if pawn.y == 375:
+            pawn4piece(pawn)
+
+def pawn4piece(pawn):
+    global rect, moverx1, moverx2, movery1, movery2, scope_pawn
+    scope_pawn = pawn
+    canvas.delete(sele.form)
+    sele.current_player, sele.waiting_player = sele.waiting_player, sele.current_player
+    sele.selector, sele.waiter = sele.waiter, sele.selector
+    sele.form = canvas.create_image(sele.x,sele.y, image=sele.selector)
+    if pawn.team == "white":
+        exchangees = exchangees_white
+    if pawn.team == "black":
+        exchangees = exchangees_black
+    rect = []
+    moverx1 = 100
+    moverx2 = 300
+    movery1 = 150
+    movery2 = 200
+    canvas.moveto(sele.form, 100, 150)
+    sele.x = 100
+    sele.y = 150
+    bg = canvas.create_rectangle(100, 150, 300, 200, fill="orange")
+    x = 100
+    y = 150
+    canvas.tag_raise(sele.form)
+    for i in range(len(exchangees)):
+        exchangees[i].x = x
+        exchangees[i].y = y
+        canvas.moveto(exchangees[i].form, exchangees[i].x, exchangees[i].y)
+        canvas.tag_raise(exchangees[i].form)
+        x += 50
+    rect.append(bg)
+    
+
+def delete_pawn4piece():
+    global rect
+    canvas.delete(rect)
+    for i in range(len(exchangees_black)):
+        exchangees_black[i].x = -100
+        exchangees_black[i].y = -100
+        canvas.moveto(exchangees_black[i], -100, -100)
+    for i in range(len(exchangees_white)):
+        exchangees_white[i].x = -100
+        exchangees_white[i].y = -100
+        canvas.moveto(exchangees_white[i], -100, -100)
+    canvas.delete(sele.form)
+    pathway_cleaner()  
+    
+piece_b1 = piece(-100,-100,"black","knight")
+piece_b2 = piece(-100,-100,"black","rook")
+piece_b3 = piece(-100,-100,"black","queen")
+piece_b4 = piece(-100,-100,"black","bishop")
+
+piece_w1 = piece(-100,-100,"white","knight")
+piece_w2 = piece(-100,-100,"white","rook")
+piece_w3 = piece(-100,-100,"white","queen")
+piece_w4 = piece(-100,-100,"white","bishop")
 
 def deleteinvalid(inv, txt):
     canvas.delete(inv, txt)
@@ -768,7 +930,8 @@ def deleteinvalid(inv, txt):
 
 def pathways(obj, arg):
     plist = []
-    if obj.x < 0 or obj.y < 0: # might be redundant, double check later
+    if obj.x == -100 or obj.y == -100: # might be redundant, double check later
+        obj.pathlist = []
         return
     if obj.ttype == "pawn":
         z = 1
@@ -879,8 +1042,6 @@ def pathways(obj, arg):
                             coords2 = coordinates(125,25)
                             coords2.castle = "ready"
                             plist.append(coords2)
-    for i in range(len(plist)):
-        print("THIS IS ABOUT TO GO THROUGH THE FUNCTIONS", plist[i].pseudo, plist[i].x, plist[i].y)
     if arg == "real":
         pathways_placer(plist)
     if arg == "invis":
@@ -934,6 +1095,7 @@ def debugger():
             if piecelist[i].ttype != "king":
                 piecelist[i].x = -100
                 piecelist[i].y = -100
+                piecelist[i].firstmove = 2
                 canvas.moveto(piecelist[i].form, piecelist[i].x-25, piecelist[i].y-25)
     
 piecelist = []
@@ -979,6 +1141,37 @@ piece30 = piece(225,25,"black","king")
 piece31 = piece(325,375,"white","knight")
 piece32 = piece(75,25,"black","knight")
 piece33 = piece(325,25,"black","knight")
+
+# pieces 4 exchange
+
+piece_b1 = piece(-100,-100,"black","knight")
+piece_b2 = piece(-100,-100,"black","rook")
+piece_b3 = piece(-100,-100,"black","queen")
+piece_b4 = piece(-100,-100,"black","bishop")
+
+piece_w1 = piece(-100,-100,"white","knight")
+piece_w2 = piece(-100,-100,"white","rook")
+piece_w3 = piece(-100,-100,"white","queen")
+piece_w4 = piece(-100,-100,"white","bishop")
+
+exchangees_black = [piece_b1, piece_b2, piece_b3, piece_b4]
+exchangees_white = [piece_w1, piece_w2, piece_w3, piece_w4]
+
+for i in range(len(exchangees_black)):
+    exchangees_black[i].exchangee = True
+
+for i in range(len(exchangees_white)):
+    exchangees_white[i].exchangee = True
+
+piecelist.append(piece_b1)
+piecelist.append(piece_b2)
+piecelist.append(piece_b3)
+piecelist.append(piece_b4)
+piecelist.append(piece_w1)
+piecelist.append(piece_w2)
+piecelist.append(piece_w3)
+piecelist.append(piece_w4)
+
 piecelist.append(piece33)
 piecelist.append(piece32)
 piecelist.append(piece31)
@@ -1022,6 +1215,8 @@ for i in range(len(piecelist)):
     if piecelist[i].team == "black":
         blacklist.append(piecelist[i])
 
+rect = 0
+
 board.bind("<Right>", lambda x: mover(sele, x=50, y=0))
 board.bind("<Left>", lambda x: mover(sele, x=-50, y=0))
 board.bind("<Up>", lambda x: mover(sele, x=0, y=-50))
@@ -1030,8 +1225,8 @@ board.bind("x", lambda x: fetcher(sele))
 board.bind("o", lambda x: debugger())
 board.bind("p", lambda x: pseudopathway_debug())
 board.bind("d", lambda x: pitcher(sele.selectee,pathlist))
-board.bind("y", lambda x: print("team", piece29.team, "status", piece29.danger))
-board.bind("u", lambda x: print("team", piece30.team, "status", piece30.danger))
+board.bind("y", lambda x: pawn4piece())
+board.bind("u", lambda x: debug_delete_pawn4piece())
 
 #Places the graphical representation of the pieces on the board
 for i in range(0,len(piecelist)):
