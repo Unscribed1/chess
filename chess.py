@@ -415,26 +415,40 @@ def piece_initialiser(obj):
 moverx1 = 0
 moverx2 = 400
 movery1 = 0
-movery2 = 400 
+movery2 = 400
+oldselex = 0
+oldseley = 0 
 scope_pawn = 0
      # 100, 150, 300, 250
 def mover(sele, x, y): # moves the selector
-    global moverx1, moverx2, movery1, movery2
+    global moverx1, moverx2, movery1, movery2, oldselex, oldseley
     canvas.move(sele.form, x, y)
+    oldselex = sele.x
+    oldseley = sele.y
     sele.x += x
     sele.y += y
     if sele.x not in range (moverx1,moverx2) or sele.y not in range(movery1,movery2):
-        canvas.moveto(sele.form, 100, 150)
-        sele.x = 100
-        sele.y = 150
+        if moverx1 == 101:
+            canvas.moveto(sele.form, 100, 150)
+            sele.x = 101
+            sele.y = 151
+        else:
+            canvas.moveto(sele.form, oldselex-25, oldseley-25)
+            sele.x = oldselex
+            sele.y = oldseley
 
 def fetcher(sele): # selects a piece
     global scope_pawn, rect
     print("this is the scope pawn", scope_pawn)
     pathway_cleaner()
+    print("this is selex", sele.x)
+    print("this is seley", sele.y)
     for i in range(0,len(piecelist)):
+        print("here1")
         if sele.x == piecelist[i].x and sele.y == piecelist[i].y:
+            print("here2")
             if sele.current_player == piecelist[i].team:
+                print("here3")
                 pathways(piecelist[i], "real")
                 xf = piecelist[i].x
                 yf = piecelist[i].y
@@ -582,19 +596,15 @@ def pitcher(selectee,pathlist): # Sends the piece to the desired location
     for i in range(0,len(piecelist)):
         pathways(piecelist[i],"invis")
     status1 = dangerchecker() 
-    # print(playerking.team,"STATUS OF THE PLAYER KING", playerking.danger)
     pathways(selectee,"invis")
-    # print("piece29.team =", piece29.team,"piece29.danger =", piece29.danger)
-    # print("piece30.team =", piece30.team,"piece30.danger =", piece30.danger)
     status2 = dangerchecker2(oldx,oldy,selectee)
-    # print("FIRSTMOVE STATUS", obj.firstmove)
     if status1 != "danger":
+        stalematechecker(enemyking, enemylist, teamlist)
         if selectee.firstmove == 1:
             selectee.firstmove = 2
     if status1 == "danger" and status2 != "invalid":
         board.after(0, printcheck)
         checkmatechecker()
-    stalematechecker(enemyking, enemylist, teamlist)
     exchangechecker(obj)
         
 
@@ -880,16 +890,16 @@ def pawn4piece(pawn):
     if pawn.team == "black":
         exchangees = exchangees_black
     rect = []
-    moverx1 = 100
-    moverx2 = 300
-    movery1 = 150
-    movery2 = 200
-    canvas.moveto(sele.form, 100, 150)
-    sele.x = 100
-    sele.y = 150
+    moverx1 = 101
+    moverx2 = 301
+    movery1 = 151
+    movery2 = 201
+    canvas.moveto(sele.form, 101, 151)
+    sele.x = 101
+    sele.y = 151
     bg = canvas.create_rectangle(100, 150, 300, 200, fill="orange")
-    x = 100
-    y = 150
+    x = 101
+    y = 151
     canvas.tag_raise(sele.form)
     for i in range(len(exchangees)):
         exchangees[i].x = x
@@ -901,18 +911,37 @@ def pawn4piece(pawn):
     
 
 def delete_pawn4piece():
-    global rect
+    global rect, moverx1, moverx2, movery1, movery2
     canvas.delete(rect)
     for i in range(len(exchangees_black)):
         exchangees_black[i].x = -100
         exchangees_black[i].y = -100
-        canvas.moveto(exchangees_black[i], -100, -100)
+        canvas.moveto(exchangees_black[i].form, -100, -100)
     for i in range(len(exchangees_white)):
         exchangees_white[i].x = -100
         exchangees_white[i].y = -100
-        canvas.moveto(exchangees_white[i], -100, -100)
+        canvas.moveto(exchangees_white[i].form, -100, -100)
     canvas.delete(sele.form)
-    pathway_cleaner()  
+    canvas.moveto(flash_obj.form, -100, -100)
+    sele.current_player, sele.waiting_player = sele.waiting_player, sele.current_player
+    sele.selector, sele.waiter = sele.waiter, sele.selector
+    sele.form = canvas.create_image(sele.x,sele.y, image=sele.selector)
+    canvas.moveto(sele.form, 150, 150)
+    sele.x = 175
+    sele.y = 175
+    moverx1 = 0
+    moverx2 = 400
+    movery1 = 0
+    movery2 = 400 
+    for i in range(len(piecelist)):
+        canvas.tag_raise(piecelist[i].form)
+    for i in range(0,len(piecelist)):
+        pathways(piecelist[i],"invis")
+    status1 = dangerchecker()
+    if status1 == "danger":
+        board.after(0, printcheck)
+        checkmatechecker()
+    pathway_cleaner() 
     
 piece_b1 = piece(-100,-100,"black","knight")
 piece_b2 = piece(-100,-100,"black","rook")
